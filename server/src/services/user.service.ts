@@ -39,17 +39,18 @@ export class UserService {
          .executeTakeFirst()
       if (!video) return { error: 'Video not found', status: 404 }
 
-      const doneAction = await this.db.pool
-         .selectFrom('actions')
-         .selectAll()
-         .where('userId', '=', data.userId)
-         .where('botId', '=', data.botId)
-         .where('videoId', '=', data.videoId)
-         .executeTakeFirst()
+      // Убираем проверку на уже просмотренное видео - позволяем ставить лайки при зацикливании
+      // const doneAction = await this.db.pool
+      //    .selectFrom('actions')
+      //    .selectAll()
+      //    .where('userId', '=', data.userId)
+      //    .where('botId', '=', data.botId)
+      //    .where('videoId', '=', data.videoId)
+      //    .executeTakeFirst()
 
-      if (doneAction) {
-         return { error: 'Video already action', status: 404 }
-      }
+      // if (doneAction) {
+      //    return { error: 'Video already action', status: 404 }
+      // }
 
       const today = new Date().toISOString().slice(0, 10)
       const actionsToday = await this.db.pool
@@ -197,8 +198,19 @@ export class UserService {
          return { error: 'Bot not found', status: 404 }
       }
 
-      // Формируем реферальную ссылку
-      const referralLink = `https://t.me/${botName}?start=trackingId_ref_${userId}`
+      // Генерируем случайную строку для реферальной ссылки
+      const generateRandomString = (length: number = 8): string => {
+         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+         let result = '';
+         for (let i = 0; i < length; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+         }
+         return result;
+      };
+
+      // Формируем реферальную ссылку с случайным кодом
+      const randomCode = generateRandomString(10);
+      const referralLink = `https://t.me/${botName}?start=${randomCode}_${userId}`
 
       return {
          status: 'success',
@@ -274,9 +286,15 @@ export class UserService {
       // Получаем бонус за реферала из таблицы bots
       const bot = await this.db.pool
          .selectFrom('bots')
-         .select(['referralReward'])
+         .select(['referralReward', 'token'])
          .where('botId', '=', botId)
          .executeTakeFirst()
+      if (!bot) {
+         return { error: 'Bot not found', status: 404 }
+      }
+      // Получаем Telegraf инстанс для этого токена
+      const botInstance = this.botManager.bots.get(bot.token)?.bot;
+      const botToken = bot.token;
 
       const referrals = await this.db.pool
          .selectFrom('referrals')
@@ -294,10 +312,27 @@ export class UserService {
             .where('botId', '=', botId)
             .executeTakeFirst()
 
+         let avatarUrl = 'https://www.pngall.com/wp-content/uploads/5/Profile-PNG-Photo.png';
+         if (botInstance && user?.telegramId) {
+           try {
+             const photos = await botInstance.telegram.getUserProfilePhotos(Number(user.telegramId), 0, 1);
+             if (photos.total_count > 0 && photos.photos[0][0]) {
+               // Берём первую (самую маленькую) фотку
+               const fileId = photos.photos[0][0].file_id;
+               const file = await botInstance.telegram.getFile(fileId);
+               avatarUrl = `https://api.telegram.org/file/bot${botToken}/${file.file_path}`;
+             }
+           } catch (e) {
+             // Если не удалось получить фото — используем placeholder
+             avatarUrl = 'https://www.pngall.com/wp-content/uploads/5/Profile-PNG-Photo.png';
+           }
+         }
+
          result.push({
             referredId: ref.referredId,
             username: user?.username ?? null,
-            bonus: bot?.referralReward ?? 0
+            bonus: bot?.referralReward ?? 0,
+            avatarUrl
          })
       }
       return result

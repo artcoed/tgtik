@@ -14,6 +14,10 @@ export class Router {
          this.botController.startBot(req, res)
       )
 
+      this.fastify.get('/api/bot/start', async (req, res) =>
+         this.botController.getBotInfo(req, res)
+      )
+
       this.fastify.post('/api/bot/stop', async (req, res) =>
          this.botController.stopBot(req, res)
       )
@@ -99,6 +103,14 @@ export class Router {
       this.fastify.get(
          '/api/webapp/:botId/canWithdraw/:userId',
          async (req, res) => this.userController.canWithdraw(req, res)
+      )
+
+      this.fastify.get('/api/i18n/:lang', async (req, res) =>
+         this.userController.getTranslations(req, res)
+      )
+
+      this.fastify.get('/api/i18n/by-country/:country', async (req, res) =>
+         this.userController.getTranslationsByCountry(req, res)
       )
    }
 }

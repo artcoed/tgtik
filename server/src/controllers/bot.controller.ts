@@ -119,6 +119,20 @@ export class BotController {
       return result
    }
 
+   public async getBotInfo(req: FastifyRequest, reply: FastifyReply) {
+      const { botId } = req.query as { botId: string }
+      if (!botId) {
+         return reply.status(400).send({ error: 'botId is required' })
+      }
+      
+      const botInfo = await this.botService.getBotInfo(botId)
+      if (!botInfo) {
+         return reply.status(404).send({ error: 'Bot not found' })
+      }
+      
+      return reply.send(botInfo)
+   }
+
    public async getChannelInviteLink(req: FastifyRequest, reply: FastifyReply) {
       const { botId } = req.params as { botId: string }
       const link = await this.botService.getChannelInviteLink(botId)

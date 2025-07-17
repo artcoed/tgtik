@@ -160,11 +160,36 @@ const videoProgressSlice = createSlice({
   }
 });
 
+// --- Auth Slice ---
+interface AuthState {
+  token: string | null;
+  user: any | null;
+}
+const initialAuthState: AuthState = {
+  token: null,
+  user: null,
+};
+const authSlice = createSlice({
+  name: 'auth',
+  initialState: initialAuthState,
+  reducers: {
+    setAuth(state, action: PayloadAction<{ token: string; user: any }>) {
+      state.token = action.payload.token;
+      state.user = action.payload.user;
+    },
+    clearAuth(state) {
+      state.token = null;
+      state.user = null;
+    },
+  },
+});
+
 export const { setLoading, setRegistered } = appSlice.actions;
 export const { startTimer, pauseTimer, resumeTimer, resetTimer, finishTimer } = timerSlice.actions;
 export const { setBalance, incrementBalance, decrementBalance } = balanceSlice.actions;
 export const { setChannelInviteLink, setChannelLoading, setBotLink } = channelSlice.actions;
 export const { setPlayedSeconds, resetPlayedSeconds } = videoProgressSlice.actions;
+export const { setAuth, clearAuth } = authSlice.actions;
 
 const rootReducer = combineReducers({
   app: appSlice.reducer,
@@ -172,6 +197,7 @@ const rootReducer = combineReducers({
   balance: balanceSlice.reducer,
   channel: channelSlice.reducer,
   videoProgress: videoProgressSlice.reducer,
+  auth: authSlice.reducer,
 });
 
 export const store = configureStore({

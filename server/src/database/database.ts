@@ -34,6 +34,7 @@ export class ApplicationDatabase {
          .addColumn('withdrawalLimit', 'integer')
          .addColumn('currency', 'text')
          .addColumn('dailyVideoLimit', 'integer')
+         .addColumn('timerDelay', 'integer')
          .addColumn('status', 'text')
          .addColumn('botId', 'text')
          .addColumn('offset', 'integer')

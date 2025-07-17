@@ -1,14 +1,32 @@
 import axios from "axios";
 import { GetIsRegisterdResponse, GetProfileResponse, GetRateWithBalanceResponse, RegisterRequest, Video, UserActionRequest, BotStartResponse } from "./types";
 import { getTelegramData, getBotId, getUserId, getCountry, isTelegramWebApp } from "../utils/telegram";
+import { store } from '../store';
 
-// const baseUrl = process.env.NODE_ENV === 'production' ? '/' : 'http://localhost:3001/'
-const baseUrl = 'http://localhost:3001/'
+const baseUrl = process.env.NODE_ENV === 'production' ? '/' : 'http://localhost:3001/'
 
 const api = axios.create({
     withCredentials: true,
     baseURL: baseUrl
 })
+
+api.interceptors.request.use(
+  (config) => {
+    // Сначала пробуем взять токен из localStorage
+    let token = localStorage.getItem('jwt');
+    // Если нет — fallback на redux (например, после логаута)
+    if (!token) {
+      token = store.getState().auth.token;
+    }
+    if (token) {
+      config.headers = config.headers || {};
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    console.log('[API] Request:', config.url, 'Authorization:', config.headers?.Authorization);
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 // Функции для получения BOT_ID и USER_ID из Telegram WebApp
 const getTelegramBotId = (): string => {

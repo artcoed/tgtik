@@ -4,6 +4,7 @@ http://localhost:3000/api/bot/start
     "token": "8073549037:AAFiVtGEXiI3U6P7g2JdOqPh6HZyJZSWwkA",
     "country": "en",
     "channelId": "1002849920311",
+    "channelInviteLink": "https://t.me/+your_channel_invite_link",
     "likeReward": 10,
     "dislikeReward": 5,
     "referralReward": 3,
@@ -11,6 +12,7 @@ http://localhost:3000/api/bot/start
     "withdrawalLimit": 200,
     "currency": "$",
     "dailyVideoLimit": 20,
+    "timerDelay": 5000,
     "status": "running"
 }
 
@@ -36,6 +38,7 @@ http://localhost:3000/api/bot/8073549037:AAFiVtGEXiI3U6P7g2JdOqPh6HZyJZSWwkA
     "token": "8073549037:AAFiVtGEXiI3U6P7g2JdOqPh6HZyJZSWwkA",
     "country": "en",
     "channelId": "1002849920311",
+    "channelInviteLink": "https://t.me/+your_channel_invite_link",
     "likeReward": 10,
     "dislikeReward": 5,
     "referralReward": 3,

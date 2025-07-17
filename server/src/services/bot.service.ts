@@ -103,7 +103,31 @@ export class BotService {
       if (!user) {
          return { error: 'User not found', status: 404 }
       }
-      const videos = await this.db.pool
+
+      // Получаем все видео для данного бота
+      const allVideos = await this.db.pool
+         .selectFrom('videos')
+         .select([
+            'videos.id',
+            'videos.url',
+            'videos.hashtags',
+            'videos.description',
+            'videos.profileId',
+            'videos.dislikeReward',
+            'videos.likeReward',
+            'videos.dislikes',
+            'videos.likes',
+            'videos.redirectChannelUrl'
+         ])
+         .where('botId', '=', data.botId)
+         .execute()
+
+      if (!allVideos || allVideos.length === 0) {
+         return { error: 'No videos available' }
+      }
+
+      // Получаем непросмотренные видео
+      const unwatchedVideos = await this.db.pool
          .selectFrom('videos')
          .select([
             'videos.id',
@@ -130,40 +154,21 @@ export class BotService {
             )
          )
          .execute()
-      if (!videos || videos.length === 0) {
-         // Если нет новых видео, пробуем вернуть одно следующее, которое пользователь не смотрел
-         const lastAction = await this.db.pool
-            .selectFrom('actions')
-            .select(['videoId'])
-            .where('userId', '=', data.userId)
-            .where('botId', '=', data.botId)
-            .orderBy('date', 'desc')
-            .limit(1)
-            .executeTakeFirst()
-         console.log(lastAction)
-         if (!lastAction) {
-            return { error: 'No watched videos' }
-         }
-         const lastWatchedVideo = await this.db.pool
-            .selectFrom('videos')
-            .select([
-               'videos.id',
-               'videos.url',
-               'videos.hashtags',
-               'videos.description',
-               'videos.profileId',
-               'videos.dislikeReward',
-               'videos.likeReward',
-               'videos.dislikes',
-               'videos.likes',
-               'videos.redirectChannelUrl'
-            ])
-            .where('id', '=', lastAction.videoId)
-            .executeTakeFirst()
-         console.log(lastWatchedVideo)
-         return [lastWatchedVideo]
+
+      // Если есть непросмотренные видео, возвращаем их
+      if (unwatchedVideos && unwatchedVideos.length > 0) {
+         console.log('DEBUG: getVideos - returning unwatched videos:', unwatchedVideos.length);
+         return unwatchedVideos
       }
-      return videos
+
+      // Если все видео просмотрены, возвращаем все видео в случайном порядке
+      // НЕ исключаем последнее просмотренное видео, чтобы пользователь не понимал, что видео закончились
+      console.log('DEBUG: getVideos - all videos watched, returning shuffled all videos:', allVideos.length);
+      
+      // Перемешиваем все видео
+      const shuffledVideos = allVideos.sort(() => Math.random() - 0.5);
+      console.log('DEBUG: getVideos - returning shuffled videos:', shuffledVideos.length);
+      return shuffledVideos;
    }
 
    public async getStatus(token: string) {
@@ -247,6 +252,39 @@ export class BotService {
          usersCount: Number(usersCount?.count ?? 0),
          pendingWithdrawals: Number(pendingWithdrawals?.sum ?? 0),
          videosCount: Number(videosCount?.count ?? 0)
+      }
+   }
+
+   public async getBotInfo(botId: string) {
+      const botData = await this.db.pool
+         .selectFrom('bots')
+         .select(['botId', 'token', 'channelInviteLink', 'timerDelay'])
+         .where('botId', '=', botId)
+         .executeTakeFirst()
+
+      console.log('DEBUG: getBotInfo botData:', botData);
+
+      if (!botData) {
+         console.log('DEBUG: Bot not found for botId:', botId);
+         return null
+      }
+
+      // Получаем имя бота для формирования ссылки на бота
+      const botName = await this.botManager.getName(botData.token)
+      const botLink = botName ? `https://t.me/${botName}` : null
+
+      const channelInviteLink = botData.channelInviteLink
+      console.log('DEBUG: getBotInfo result:', {
+         botId: botData.botId,
+         channelInviteLink: channelInviteLink,
+         botLink: botLink
+      });
+
+      return {
+         botId: botData.botId,
+         channelInviteLink: channelInviteLink,
+         botLink: botLink,
+         timerDelay: botData.timerDelay || 3000
       }
    }
 

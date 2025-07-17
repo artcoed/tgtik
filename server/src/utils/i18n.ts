@@ -2,15 +2,209 @@ import { Translation, GetTranslationParams } from './types'
 
 const translations: Record<string, Translation> = {
    en: {
-      welcome: 'Welcome! Open the WebApp to start.',
-      subscribed:
-         'You have subscribed to the channel! Bonus: {bonus} {currency}',
-      error: 'An error occurred. Please try again.'
+      welcome: '<b>Welcome!</b> <i>Open the WebApp to start.</i>',
+      subscribed: 'You have subscribed to the channel! Bonus: {bonus} {currency}',
+      error: 'An error occurred. Please try again.',
+      createAccount: 'CREATE AN ACCOUNT',
+      next: 'Next',
+      subscribeToCommunities: 'subscribe to communities',
+      home: 'Home',
+      bonus: 'Bonus',
+      money: 'Money',
+      rateVideosTitle: 'Rate videos and earn real money',
+      rateVideosDesc: 'Companies pay for each video you watch and rate to help determine the most popular content.',
+      howToEarn: 'How to earn more? • all this in the channel 🔥‍🔥‍🔥',
+      withdraw: 'Withdraw',
+      videoLimitTitle: 'Daily video limit reached',
+      videoLimitDesc: 'You have watched the maximum number of videos for today. Come back tomorrow to continue earning (videos are refreshed ',
+      videoLimitRefresh: 'every 24 hours',
+      videoLimitDescEnd: ').',
+      continue: 'Continue',
+      bonusGift: 'Bonus Gift',
+      toBalance: 'to balance',
+      bonusValue: '+$100',
+      claimGift: 'Claim gift',
+      pleaseIndicateCard: 'Please indicate your card number',
+      card: 'Card',
+      orUseIban: 'Or use your IBAN account',
+      iban: 'IBAN',
+      ibanPlaceholder: 'from 15 to 34 characters',
+      amountToWithdraw: 'Amount to withdraw',
+      amount: 'Amount',
+      sum: 'Sum',
+      noSponsorSubscription: 'You dont have a sponsor subscription',
+      subscribeAndTry: 'Subscribe and try again',
+      alreadyGetBonus: 'You already get bonus',
+      thanks: 'Thanks',
+      giftClaimed: 'Gift claimed!',
+      youReceived: 'You received +{amount}{currency}',
+      serverError: 'Server error',
+      bonusNotReceived: 'Bonus not received',
+      invite: 'Invite',
+      promocodeError: 'Promocode error',
+      promocodeNotFound: 'Promocode is not found!',
+      secretBonus: 'Secret bonus',
+      activatedCodes: 'Activated codes: {count}',
+      subscribeToChannel: 'Subscribe to the channel',
+      followNews: 'Follow the news in the channel and get bonuses to your balance',
+      linkCopied: 'Link copied to clipboard!',
+      shareMenuOpened: 'Share menu opened!',
+      linkCopyError: 'Error copying link',
+      linkShareError: 'Error sharing or copying link.',
+      currency: '$',
+      openWebAppButton: 'Open WebApp',
+      // Registration
+      registrationRequired: 'Registration is required to continue so we can better collect data on ratings',
+      pleaseIndicateGender: 'Please indicate your gender',
+      male: 'Male',
+      female: 'Female',
+      other: 'Other',
+      pleaseIndicateAge: 'Please indicate your age',
+      age: 'Age',
+      ageRange: 'from 16 to 100 years',
+      specifyAge: 'Please specify your age (from 16 to 100)',
+      specifyGender: 'Please also specify your gender.',
+      // Video rating
+      rateVideo: 'Rate video',
+      // Profile
+      yourProfile: 'Your profile',
+      accountNotVerified: 'Account not verified',
+      dateOfRegistration: 'Date of registration',
+      friendsInvited: 'Friends invited',
+      likes: 'Likes',
+      dislikes: 'Dislikes',
+      earnings: 'Earnings',
+      passVerification: 'Pass verification',
+      share: 'Share',
+      // Referral system
+      referralSystemBonus: 'REFERAL SYSTEM BONUS REFERAL SYSTEM BONUS REFERAL SYSTEM BONUS REFERAL SYSTEM BONUS REFERAL SYSTEM BONUS REFERAL SYSTEM BONUS REFERAL SYSTEM BONUS REFERAL SYSTEM BONUS REFERAL SYSTEM BONUS REFERAL SYSTEM BONUS',
+      promocode: 'Promo code...',
+      friendsList: 'Friends list',
+      invitedFriends: 'Invited friends: {count}',
+      reload: 'Reload',
+      copyInvitationLink: 'Copy invitation link',
+      copy: 'Copy',
+      inviteFriendsEarn: 'Invite your friends and start earning! Share your link or send a direct invitation — get {currency}100 for each friend you bring. Start earning today!',
+      inviteFriendsBonus: 'Invite friends to receive a bonus',
+      invitedFriendsAppear: 'All invited friends will appear in this list',
+      // Withdrawal
+      insufficientFunds: 'Insufficient Funds',
+      minimumWithdrawalLimit: 'The minimum withdrawal limit is {currency}{amount}. Keep earning by watching and rating videos',
+      continueWorking: 'Continue working',
+      // Gift toast messages
+      giftToast: {
+         noSubscriptionTitle: 'No subscription',
+         noSubscriptionDescription: 'Subscribe to the channel to get a gift',
+         alreadyBonusTitle: 'Bonus already received',
+         alreadyBonusDescription: 'You have already received the bonus gift',
+         giftClaimedTitle: 'Gift claimed!',
+         giftClaimedDescription: 'You received +{amount} {currency}',
+         serverErrorTitle: 'Server error',
+         serverErrorDescription: 'Failed to claim gift. Please try again.'
+      }
    },
    ru: {
-      welcome: 'Добро пожаловать! Откройте WebApp, чтобы начать.',
+      // Можно использовать HTML/Markdown-теги Telegram для форматирования
+      welcome: '<b>Добро пожаловать!</b> <i>Откройте WebApp, чтобы начать.</i>',
       subscribed: 'Вы подписались на канал! Бонус: {bonus} {currency}',
-      error: 'Произошла ошибка. Попробуйте снова.'
+      error: 'Произошла ошибка. Попробуйте снова.',
+      createAccount: 'СОЗДАТЬ АККАУНТ',
+      next: 'Далее',
+      subscribeToCommunities: 'подписаться на сообщества',
+      home: 'Главная',
+      bonus: 'Бонус',
+      money: 'Деньги',
+      rateVideosTitle: 'Оценивай видео и зарабатывай реальные деньги',
+      rateVideosDesc: 'Компании платят за каждое просмотренное и оценённое видео, чтобы определить самый популярный контент.',
+      howToEarn: 'Как заработать больше? • всё в канале 🔥‍🔥‍🔥',
+      withdraw: 'Вывести',
+      videoLimitTitle: 'Достигнут дневной лимит видео',
+      videoLimitDesc: 'Вы просмотрели максимальное количество видео на сегодня. Зайдите завтра, чтобы продолжить зарабатывать (видео обновляются ',
+      videoLimitRefresh: 'каждые 24 часа',
+      videoLimitDescEnd: ').',
+      continue: 'Продолжить',
+      bonusGift: 'Бонусный подарок',
+      toBalance: 'на баланс',
+      bonusValue: '+100₽',
+      claimGift: 'Забрать подарок',
+      pleaseIndicateCard: 'Пожалуйста, укажите номер вашей карты',
+      card: 'Карта',
+      orUseIban: 'Или используйте IBAN счёт',
+      iban: 'IBAN',
+      ibanPlaceholder: 'от 15 до 34 символов',
+      amountToWithdraw: 'Сумма к выводу',
+      amount: 'Сумма',
+      sum: 'Сумма',
+      noSponsorSubscription: 'У вас нет спонсорской подписки',
+      subscribeAndTry: 'Подпишитесь и попробуйте снова',
+      alreadyGetBonus: 'Вы уже получили бонус',
+      thanks: 'Спасибо',
+      giftClaimed: 'Подарок получен!',
+      youReceived: 'Вы получили +{amount}{currency}',
+      serverError: 'Ошибка сервера',
+      bonusNotReceived: 'Бонус не получен',
+      invite: 'Пригласить',
+      promocodeError: 'Ошибка промокода',
+      promocodeNotFound: 'Промокод не найден!',
+      secretBonus: 'Секретный бонус',
+      activatedCodes: 'Активировано кодов: {count}',
+      subscribeToChannel: 'Подписаться на канал',
+      followNews: 'Следите за новостями в канале и получайте бонусы на баланс',
+      linkCopied: 'Ссылка скопирована в буфер обмена!',
+      shareMenuOpened: 'Меню шаринга открыто!',
+      linkCopyError: 'Ошибка при копировании ссылки',
+      linkShareError: 'Ошибка при копировании или отправке ссылки.',
+      currency: '₽',
+      openWebAppButton: 'Открыть WebApp',
+      // Registration
+      registrationRequired: 'Регистрация необходима для продолжения, чтобы мы могли лучше собирать данные о рейтингах',
+      pleaseIndicateGender: 'Пожалуйста, укажите ваш пол',
+      male: 'Мужской',
+      female: 'Женский',
+      other: 'Другой',
+      pleaseIndicateAge: 'Пожалуйста, укажите ваш возраст',
+      age: 'Возраст',
+      ageRange: 'от 16 до 100 лет',
+      specifyAge: 'Пожалуйста, укажите ваш возраст (от 16 до 100)',
+      specifyGender: 'Также укажите ваш пол.',
+      // Video rating
+      rateVideo: 'Оценить видео',
+      // Profile
+      yourProfile: 'Ваш профиль',
+      accountNotVerified: 'Аккаунт не верифицирован',
+      dateOfRegistration: 'Дата регистрации',
+      friendsInvited: 'Приглашено друзей',
+      likes: 'Лайки',
+      dislikes: 'Дизлайки',
+      earnings: 'Заработок',
+      passVerification: 'Пройти верификацию',
+      share: 'Поделиться',
+      // Referral system
+      referralSystemBonus: 'РЕФЕРАЛЬНАЯ СИСТЕМА БОНУС РЕФЕРАЛЬНАЯ СИСТЕМА БОНУС РЕФЕРАЛЬНАЯ СИСТЕМА БОНУС РЕФЕРАЛЬНАЯ СИСТЕМА БОНУС РЕФЕРАЛЬНАЯ СИСТЕМА БОНУС РЕФЕРАЛЬНАЯ СИСТЕМА БОНУС РЕФЕРАЛЬНАЯ СИСТЕМА БОНУС РЕФЕРАЛЬНАЯ СИСТЕМА БОНУС РЕФЕРАЛЬНАЯ СИСТЕМА БОНУС РЕФЕРАЛЬНАЯ СИСТЕМА БОНУС',
+      promocode: 'Промокод...',
+      friendsList: 'Список друзей',
+      invitedFriends: 'Приглашено друзей: {count}',
+      reload: 'Обновить',
+      copyInvitationLink: 'Скопировать ссылку приглашения',
+      copy: 'Копировать',
+      inviteFriendsEarn: 'Приглашайте друзей и начинайте зарабатывать! Поделитесь своей ссылкой или отправьте прямое приглашение — получите {currency}100 за каждого приглашённого друга. Начинайте зарабатывать уже сегодня!',
+      inviteFriendsBonus: 'Приглашайте друзей, чтобы получить бонус',
+      invitedFriendsAppear: 'Все приглашённые друзья появятся в этом списке',
+      // Withdrawal
+      insufficientFunds: 'Недостаточно средств',
+      minimumWithdrawalLimit: 'Минимальный лимит вывода составляет {currency}{amount}. Продолжайте зарабатывать, просматривая и оценивая видео',
+      continueWorking: 'Продолжить работу',
+      // Gift toast messages
+      giftToast: {
+         noSubscriptionTitle: 'Нет подписки',
+         noSubscriptionDescription: 'Подпишитесь на канал, чтобы получить подарок',
+         alreadyBonusTitle: 'Бонус уже получен',
+         alreadyBonusDescription: 'Вы уже получили бонусный подарок',
+         giftClaimedTitle: 'Подарок получен!',
+         giftClaimedDescription: 'Вы получили +{amount} {currency}',
+         serverErrorTitle: 'Ошибка сервера',
+         serverErrorDescription: 'Не удалось получить подарок. Попробуйте снова.'
+      }
    }
 }
 
@@ -20,13 +214,16 @@ export function getTranslation(
    params: GetTranslationParams = {}
 ) {
    const code = languageCode?.toLowerCase()
-   console.log('getTranslation:', { code, key, params })
    const lang = code && translations[code] ? code : 'en'
-   let text = translations[lang][key] || translations.en[key] || key
+   const raw = translations[lang][key] || translations.en[key] || key
+   if (typeof raw === 'string') {
+      let text = raw;
    Object.entries(params).forEach(([k, v]) => {
       text = text.replace(`{${k}}`, v.toString())
    })
    return text
+   }
+   return ''
 }
 
 export { translations }

@@ -27,7 +27,8 @@ export class BotManager {
          console.log('Получен /start от', ctx.from.id)
          const trackingId = ctx.payload || ''
          const username = ctx.from.username || ''
-         const referralId = ctx.payload?.split('_ref_')[1] || '' // Предполагаем формат "trackingId_ref_referralId"
+         // Парсим referralId из нового формата: "randomCode_userId"
+         const referralId = ctx.payload?.split('_').pop() || '' // Берем последнюю часть после последнего подчеркивания
          const userId = ctx.from.id.toString()
          /*
          // Отправка в Keitaro (как было)
@@ -104,16 +105,17 @@ export class BotManager {
 
          const videoPath = path.join(__dirname, '../../public/videos/video.mp4')
          await ctx.replyWithVideo(
-             { source: videoPath }, // Путь к MP4-файлу на сервере
+             { source: videoPath },
              {
-                caption: getTranslation(config.country, 'welcome'), // Текст сообщения
+                caption: getTranslation(config.country, 'welcome'),
+                parse_mode: 'HTML', // Enable Telegram HTML markup in the welcome message
                 reply_markup: {
                    inline_keyboard: [
                       [
                          {
-                            text: 'Open WebApp',
+                            text: getTranslation(config.country, 'openWebAppButton'),
                             web_app: {
-                               url: `https://tgtik1.netlify.app/?bot_id=${config.botId}`
+                               url: `https://tgtik1.netlify.app/?bot_id=${config.botId}&country=${config.country}`
                             }
                          }
                       ]
@@ -121,28 +123,17 @@ export class BotManager {
                 }
              }
          );
-
-         // Отправка сообщения (как было)
-         // ctx.reply(getTranslation(config.country, 'welcome'), {
-         //    reply_markup: {
-         //       inline_keyboard: [
-         //          [
-         //             {
-         //                text: 'Open WebApp',
-         //                web_app: {
-         //                   url: `https://${process.env.DOMAIN || 'your-domain.com'}/webapp/${config.token}`
-         //                }
-         //             }
-         //          ]
-         //       ]
-         //    }
-         // })
       })
 
       bot.on('chat_member', async ctx => {
          const member = ctx.update.chat_member
          const userId = member.new_chat_member.user.id.toString()
-         if (member.chat.id.toString() === config.channelId) {
+         // Срабатывает только если пользователь ВСТУПИЛ в канал
+         const joinedStatuses = ['member', 'administrator', 'creator'];
+         if (
+           member.chat.id.toString() === config.channelId &&
+           joinedStatuses.includes(member.new_chat_member.status)
+         ) {
             console.log('Logic')
             const user = await this.db.pool
                .selectFrom('users')

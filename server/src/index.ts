@@ -9,10 +9,14 @@ import { BotController } from './controllers/bot.controller'
 import { UserController } from './controllers/user.controller'
 import { Router } from './router/router'
 
-dotenv.config({ path: __dirname + `/config/.env.${process.env.NODE_ENV}` })
-const PORT = process.env.PORT ? Number(process.env.PORT) : 5000
-console.log(process.env.PORT)
-const connectionString = process.env.DATABASE_URL ?? ''
+// Загружаем переменные окружения
+const envPath = __dirname + `/config/.env.${process.env.NODE_ENV || 'development'}`;
+dotenv.config({ path: envPath });
+
+const PORT = process.env.PORT ? Number(process.env.PORT) : 3001;
+
+// Используем правильный connection string для Docker
+const connectionString = process.env.DATABASE_URL ?? 'postgresql://postgres:12345@postgres:5432/bot-database';
 const fastify = Fastify({ logger: true })
 
 const database = new ApplicationDatabase(connectionString)
@@ -26,20 +30,36 @@ const userController = new UserController(userService)
 const router = new Router(fastify, userController, botController)
 
 ;(async () => {
-   await fastify.register(cors, {
-      origin: true,
-      credentials: true
-   })
-   await database.migrate()
-   router.init()
-   fastify.listen({ port: PORT, host: '0.0.0.0' }, async (err: any) => {
-      if (err) {
-         fastify.log.error(err)
-         process.exit(1)
-      }
-      console.log(`Server started on port ${PORT}`)
-      await botManager.loadBots()
-   })
+   try {
+      console.log('Starting server...');
+      console.log('Connecting to database...');
+      
+      await fastify.register(cors, {
+         origin: true,
+         credentials: true
+      })
+      
+      console.log('Running database migrations...');
+      await database.migrate()
+      
+      console.log('Initializing router...');
+      router.init()
+      
+      console.log('Starting server on port', PORT);
+      fastify.listen({ port: PORT, host: '0.0.0.0' }, async (err: any) => {
+         if (err) {
+            fastify.log.error(err)
+            process.exit(1)
+         }
+         console.log(`Server started on port ${PORT}`)
+         console.log('Loading bots...');
+         await botManager.loadBots()
+         console.log('Server is ready!');
+      })
+   } catch (error) {
+      console.error('Failed to start server:', error);
+      process.exit(1);
+   }
 })()
 
 process.on('SIGTERM', async () => {

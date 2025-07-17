@@ -14,6 +14,7 @@ export interface Database {
       withdrawalLimit: number // Changed from float to number
       currency: string
       dailyVideoLimit: number
+      timerDelay: number
       status: 'running' | 'stopped'
       offset: number
    }
@@ -79,6 +80,7 @@ export interface BotConfig {
    withdrawalLimit: number
    currency: string
    dailyVideoLimit: number
+   timerDelay: number
    status: 'running' | 'stopped'
    channelInviteLink: string
 }
@@ -87,6 +89,103 @@ export interface Translation {
    welcome: string
    subscribed: string
    error: string
+   createAccount: string
+   next: string
+   subscribeToCommunities: string
+   home: string
+   bonus: string
+   money: string
+   rateVideosTitle: string
+   rateVideosDesc: string
+   howToEarn: string
+   withdraw: string
+   videoLimitTitle: string
+   videoLimitDesc: string
+   videoLimitRefresh: string
+   videoLimitDescEnd: string
+   continue: string
+   bonusGift: string
+   toBalance: string
+   bonusValue: string
+   claimGift: string
+   pleaseIndicateCard: string
+   card: string
+   orUseIban: string
+   iban: string
+   ibanPlaceholder: string
+   amountToWithdraw: string
+   amount: string
+   sum: string
+   noSponsorSubscription: string
+   subscribeAndTry: string
+   alreadyGetBonus: string
+   thanks: string
+   giftClaimed: string
+   youReceived: string
+   serverError: string
+   bonusNotReceived: string
+   invite: string
+   promocodeError: string
+   promocodeNotFound: string
+   secretBonus: string
+   activatedCodes: string
+   subscribeToChannel: string
+   followNews: string
+   linkCopied: string
+   shareMenuOpened: string
+   linkCopyError: string
+   linkShareError: string
+   currency: string
+   // Registration
+   registrationRequired: string
+   pleaseIndicateGender: string
+   male: string
+   female: string
+   other: string
+   pleaseIndicateAge: string
+   age: string
+   ageRange: string
+   specifyAge: string
+   specifyGender: string
+   // Video rating
+   rateVideo: string
+   // Profile
+   yourProfile: string
+   accountNotVerified: string
+   dateOfRegistration: string
+   friendsInvited: string
+   likes: string
+   dislikes: string
+   earnings: string
+   passVerification: string
+   share: string
+   // Referral system
+   referralSystemBonus: string
+   promocode: string
+   friendsList: string
+   invitedFriends: string
+   reload: string
+   copyInvitationLink: string
+   copy: string
+   inviteFriendsEarn: string
+   inviteFriendsBonus: string
+   invitedFriendsAppear: string
+   // Withdrawal
+   insufficientFunds: string
+   minimumWithdrawalLimit: string
+   continueWorking: string
+   // Gift toast messages
+   giftToast: {
+      noSubscriptionTitle: string
+      noSubscriptionDescription: string
+      alreadyBonusTitle: string
+      alreadyBonusDescription: string
+      giftClaimedTitle: string
+      giftClaimedDescription: string
+      serverErrorTitle: string
+      serverErrorDescription: string
+   }
+   openWebAppButton: string
 }
 
 export type GetTranslationParams = Record<string, string | number>

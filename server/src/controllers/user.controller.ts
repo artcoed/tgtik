@@ -1,6 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { UserService } from '../services/user.service'
 import { AddReferral, DoWithdraw, GetBalance, UserAction } from '../utils/types'
+import { translations } from '../utils/i18n';
 
 export class UserController {
    constructor(private readonly userService: UserService) {}
@@ -137,5 +138,19 @@ export class UserController {
       const { userId, botId } = req.params as { userId: string; botId: string }
       const result = await this.userService.canWithdraw(userId, botId)
       return reply.send(result)
+   }
+
+   public async getTranslations(req: FastifyRequest, reply: FastifyReply) {
+      const { lang } = req.params as { lang: string };
+      const code = lang?.toLowerCase() || 'en';
+      const data = translations[code] || translations['en'];
+      return reply.send(data);
+   }
+
+   public async getTranslationsByCountry(req: FastifyRequest, reply: FastifyReply) {
+      const { country } = req.params as { country: string };
+      const code = country?.toLowerCase() || 'en';
+      const data = translations[code] || translations['en'];
+      return reply.send(data);
    }
 }

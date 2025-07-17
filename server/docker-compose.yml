@@ -13,13 +13,23 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   app:
     build: .
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     ports:
       - '3001:3001'
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:12345@postgres:5432/bot-database
+      - PORT=3001
     restart: unless-stopped
 
 volumes:

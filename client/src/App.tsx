@@ -15,7 +15,7 @@ import GiftToast from './components/GiftToast';
 import DebugBlock from './components/DebugBlock';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState, AppDispatch } from './store';
-import { setLoading, setRegistered, setBalance, setChannelInviteLink, setChannelLoading, setBotLink } from './store';
+import { setLoading, setRegistered, setBalance, setChannelInviteLink, setChannelLoading, setBotLink, setAuth } from './store';
 import { AxiosError } from "axios";
 import { initTelegramWebApp } from './utils/telegram';
 
@@ -261,6 +261,41 @@ export default function App() {
       return () => clearTimeout(timeout);
     }
   }, [isOpenBackgroundModal, pendingTab]);
+
+  // Восстановление токена из localStorage при старте
+  useEffect(() => {
+    const token = localStorage.getItem('jwt');
+    const user = localStorage.getItem('user');
+    if (token && user) {
+      dispatch(setAuth({ token, user: JSON.parse(user) }));
+    }
+  }, [dispatch]);
+
+  // Авторизация через Telegram WebApp
+  useEffect(() => {
+    if (window.Telegram?.WebApp) {
+      window.Telegram.WebApp.ready();
+      const initData = window.Telegram.WebApp.initData;
+      const botId = getBotId();
+      fetch("http://localhost:3001/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ initData, botId }),
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error("Authentication failed");
+          return res.json();
+        })
+        .then(({ token, user }) => {
+          localStorage.setItem("jwt", token);
+          localStorage.setItem("user", JSON.stringify(user));
+          dispatch(setAuth({ token, user }));
+        })
+        .catch((err) => {
+          // обработка ошибки
+        });
+    }
+  }, [dispatch]);
 
   if (isLoading || !translations) {
     return <HelloLoader />;
