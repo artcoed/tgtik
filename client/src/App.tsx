@@ -18,6 +18,8 @@ import type { RootState, AppDispatch } from './store';
 import { setLoading, setRegistered, setBalance, setChannelInviteLink, setChannelLoading, setBotLink, setAuth } from './store';
 import { AxiosError } from "axios";
 import { initTelegramWebApp } from './utils/telegram';
+import { api } from './api/api';
+import { baseUrl } from './api/api';
 
 function BackgroundModal({ open, onClose, children }: { open: boolean, onClose: () => void, children: React.ReactNode }) {
   const [animate, setAnimate] = useState(false);
@@ -271,28 +273,19 @@ export default function App() {
     }
   }, [dispatch]);
 
-  // Авторизация через Telegram WebApp
   useEffect(() => {
     if (window.Telegram?.WebApp) {
       window.Telegram.WebApp.ready();
       const initData = window.Telegram.WebApp.initData;
       const botId = getBotId();
-      fetch("http://localhost:3001/api/auth", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ initData, botId }),
-      })
+      api.post(`${baseUrl}api/auth`, { initData, botId })
         .then((res) => {
-          if (!res.ok) throw new Error("Authentication failed");
-          return res.json();
-        })
-        .then(({ token, user }) => {
+          const { token, user } = res.data;
           localStorage.setItem("jwt", token);
           localStorage.setItem("user", JSON.stringify(user));
           dispatch(setAuth({ token, user }));
         })
         .catch((err) => {
-          // обработка ошибки
         });
     }
   }, [dispatch]);
