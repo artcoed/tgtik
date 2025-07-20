@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { Video as VideoType } from '../api/types';
 import Loader from './Loader';
+import PauseIcon from '../assets/PauseIcon.svg';
 
 interface VideoPlayerProps {
   setProgress: (v: number) => void;
@@ -81,73 +82,93 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
       background: '#000'
     }}>
       {videos[currentIndex]?.url ? (
-        <video
-          ref={videoRef}
-          src={videos[currentIndex].url}
-          width="100%"
-          height="100%"
-          playsInline={true}
-          controls={false}
-          crossOrigin="anonymous"
-          muted={muted}
-          onTimeUpdate={() => {
-            if (videoRef.current) {
-              setProgress(videoRef.current.currentTime / videoRef.current.duration);
-              if (onProgress) {
-                onProgress({ playedSeconds: videoRef.current.currentTime });
+        <>
+          <video
+            ref={videoRef}
+            src={videos[currentIndex].url}
+            width="100%"
+            height="100%"
+            playsInline={true}
+            controls={false}
+            crossOrigin="anonymous"
+            muted={muted}
+            onTimeUpdate={() => {
+              if (videoRef.current) {
+                setProgress(videoRef.current.currentTime / videoRef.current.duration);
+                if (onProgress) {
+                  onProgress({ playedSeconds: videoRef.current.currentTime });
+                }
               }
-            }
-          }}
-          autoPlay={playing}
-          onClick={() => {
-            if (videoRef.current) {
-              if (playing) {
-                videoRef.current.pause();
-                setPlaying(false);
-              } else {
+            }}
+            autoPlay={playing}
+            onClick={() => {
+              if (videoRef.current) {
+                if (playing) {
+                  videoRef.current.pause();
+                  setPlaying(false);
+                } else {
+                  videoRef.current.play().catch((err) => {
+                    if (err.name !== 'AbortError') {
+                      console.error('Video play error:', err);
+                    }
+                  });
+                  setPlaying(true);
+                  if (setIsFirstPlay) setIsFirstPlay(false); // снимаем mute при первом play
+                }
+              }
+            }}
+            onEnded={() => {
+              if (videoRef.current) {
+                videoRef.current.currentTime = 0;
                 videoRef.current.play().catch((err) => {
                   if (err.name !== 'AbortError') {
                     console.error('Video play error:', err);
                   }
                 });
-                setPlaying(true);
-                if (setIsFirstPlay) setIsFirstPlay(false); // снимаем mute при первом play
               }
-            }
-          }}
-          onEnded={() => {
-            if (videoRef.current) {
-              videoRef.current.currentTime = 0;
-              videoRef.current.play().catch((err) => {
-                if (err.name !== 'AbortError') {
-                  console.error('Video play error:', err);
-                }
-              });
-            }
-          }}
-          onLoadStart={() => setIsVideoLoading(true)}
-          onWaiting={() => setIsVideoLoading(true)}
-          onCanPlay={() => {
-            setIsVideoLoading(false);
-            if (onVideoReady) onVideoReady();
-            if (shouldSeekRef.current && videoRef.current) {
-              videoRef.current.currentTime = playedSeconds;
-              lastSeekRef.current = playedSeconds;
-              shouldSeekRef.current = false;
-            }
-            if (playing && videoRef.current && videoRef.current.paused) {
-              videoRef.current.play().catch(() => {});
-            }
-          }}
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            display: 'block',
-            background: '#000',
-            cursor: 'pointer',
-          }}
-        />
+            }}
+            onLoadStart={() => setIsVideoLoading(true)}
+            onWaiting={() => setIsVideoLoading(true)}
+            onCanPlay={() => {
+              setIsVideoLoading(false);
+              if (onVideoReady) onVideoReady();
+              if (shouldSeekRef.current && videoRef.current) {
+                videoRef.current.currentTime = playedSeconds;
+                lastSeekRef.current = playedSeconds;
+                shouldSeekRef.current = false;
+              }
+              if (playing && videoRef.current && videoRef.current.paused) {
+                videoRef.current.play().catch(() => {});
+              }
+            }}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              display: 'block',
+              background: '#000',
+              cursor: 'pointer',
+            }}
+          />
+          {/* Иконка паузы поверх видео */}
+          <img
+            src={PauseIcon}
+            alt="Pause"
+            style={{
+              position: 'absolute',
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: 80,
+              height: 80,
+              opacity: playing ? 0 : 1,
+              pointerEvents: 'none',
+              transition: 'opacity 0.3s',
+              zIndex: 10,
+              filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))',
+            }}
+          />
+        </>
       ) : null}
       {/* Loader is now handled by parent via isVideoLoading state */}
     </div>
