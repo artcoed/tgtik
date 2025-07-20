@@ -25,6 +25,7 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
   const lastSeekRef = useRef<number>(-1);
   const shouldSeekRef = useRef(false);
   const wasFirstPause = useRef(false);
+  const playRequested = useRef(false);
 
   useEffect(() => {
     if (videoRef.current) {
@@ -109,13 +110,17 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
                   videoRef.current.pause();
                   setPlaying(false);
                 } else {
-                  videoRef.current.play().catch((err) => {
-                    if (err.name !== 'AbortError') {
-                      console.error('Video play error:', err);
-                    }
-                  });
-                  setPlaying(true);
-                  if (setIsFirstPlay) setIsFirstPlay(false); // снимаем mute при первом play
+                  if (videoRef.current.readyState >= 3) {
+                    videoRef.current.play().catch((err) => {
+                      if (err.name !== 'AbortError') {
+                        console.error('Video play error:', err);
+                      }
+                    });
+                    setPlaying(true);
+                    if (setIsFirstPlay) setIsFirstPlay(false);
+                  } else {
+                    playRequested.current = true;
+                  }
                 }
               }
             }}
@@ -150,6 +155,12 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
                   setIsFirstPlay(false);
                 }, 0);
               }
+              // Если пользователь кликнул play до готовности видео, включаем проигрывание сейчас
+              if (playRequested.current) {
+                setPlaying(true);
+                playRequested.current = false;
+                if (setIsFirstPlay) setIsFirstPlay(false);
+              }
             }}
             style={{
               width: '100%',
@@ -170,8 +181,8 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
               transition: 'opacity 0.35s cubic-bezier(.4,0,.2,1), transform 0.35s cubic-bezier(.4,0,.2,1)',
               pointerEvents: 'none',
               zIndex: 2,
-              width: 96,
-              height: 96,
+              width: 82,
+              height: 82,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -182,8 +193,8 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
               src={playIcon}
               alt="Play"
               style={{
-                width: 96,
-                height: 96,
+                width: 82,
+                height: 82,
                 display: 'block',
                 pointerEvents: 'none',
                 userSelect: 'none',
