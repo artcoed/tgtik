@@ -9,6 +9,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import type { RootState, AppDispatch } from '../store';
 import { startTimer, pauseTimer, resumeTimer, resetTimer, finishTimer, TimerStatus } from '../store';
 import { getReferralUrl, BOT_ID, USER_ID } from '../api/api';
+import HelloLoader from './HelloLoader';
 
 // Функция для форматирования чисел (тысячи, миллионы)
 const formatNumber = (num: number): string => {
@@ -65,6 +66,8 @@ function VideoSidebar({ onProfileClick, onLike, onDislike, likes, dislikes, curr
 
     const prevIndex = useRef(currentIndex);
     const wasUnmounted = useRef(false);
+    const [avatarLoaded, setAvatarLoaded] = useState(false);
+    const avatarSrc = profileLogoUrl || Profile1Image;
 
     // Сбросить все reward-состояния и таймер только при смене видео (не при каждом монтировании)
     useEffect(() => {
@@ -226,12 +229,18 @@ function VideoSidebar({ onProfileClick, onLike, onDislike, likes, dislikes, curr
   return (
     <div className={styles.videoSidebar}>
       <div className={styles.sidebarProfileWrapper}>
+        {!avatarLoaded && (
+          <div style={{width: 50, height: 50, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+            <HelloLoader />
+          </div>
+        )}
         <img 
-          src={profileLogoUrl || Profile1Image} 
+          src={avatarSrc} 
           alt="profile" 
           className={styles.sidebarProfileImg} 
           onClick={openTelegramChannel}
-          style={{ cursor: 'pointer' }}
+          style={{ cursor: 'pointer', display: avatarLoaded ? 'block' : 'none' }}
+          onLoad={() => setAvatarLoaded(true)}
         />
         <div className={styles.sidebarPlusVideo}>
           <div className={styles.sidebarPlusVideoDot}>
