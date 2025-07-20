@@ -84,7 +84,11 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
       height: '100vh',
       position: 'relative',
       overflow: 'hidden',
-      background: '#000'
+      background: '#000',
+      WebkitTouchCallout: 'none',
+      WebkitUserSelect: 'none',
+      userSelect: 'none',
+      touchAction: 'manipulation'
     }}>
       {videos[currentIndex]?.url ? (
         <>
@@ -164,6 +168,10 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
               display: 'block',
               background: '#000',
               cursor: 'pointer',
+              WebkitTouchCallout: 'none',
+              WebkitUserSelect: 'none',
+              userSelect: 'none',
+              touchAction: 'manipulation'
             }}
           />
           <div
@@ -187,13 +195,16 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
             <img
               src={playIcon}
               alt="Play"
-              style={{
-                width: 82,
-                height: 82,
-                display: 'block',
-                pointerEvents: 'none',
-                userSelect: 'none',
-              }}
+                          style={{
+              width: 82,
+              height: 82,
+              display: 'block',
+              pointerEvents: 'none',
+              userSelect: 'none',
+              WebkitTouchCallout: 'none',
+              WebkitUserSelect: 'none',
+              touchAction: 'manipulation'
+            }}
             />
           </div>
         </>
