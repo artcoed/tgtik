@@ -443,20 +443,22 @@ function HomePage({ onSelect, activeTab, setMoney, showToast, showErrorModal, se
           key={currentIndex}
           onLike={handleLike}
           onDislike={handleDislike}
-          likes={videos[currentIndex]?.likes}
-          dislikes={videos[currentIndex]?.dislikes}
+          likes={videos[currentIndex]?.likes || 0}
+          dislikes={videos[currentIndex]?.dislikes || 0}
           rate={rate}
           likeReward={reward.likeReward}
-          dislikeReward={reward?.dislikeReward}
+          dislikeReward={reward.dislikeReward}
           isVideoReady={isVideoReady}
           currentIndex={currentIndex}
           activeTab={activeTab}
           playing={playing}
           isVideoLoading={isVideoLoading}
-          redirectChannelUrl={videos[currentIndex]?.redirectChannelUrl}
+          redirectChannelUrl={videos[currentIndex]?.redirectChannelUrl || ''}
           translations={translations}
-          timerDelay={timerDelay || 3000}
-          logPrefix={'[VideoSidebar]'}
+          timerDelay={timerDelay}
+          logPrefix={'[HomePage]'}
+          botToken={botId || ''}
+          channelId={videos[currentIndex]?.profileId || ''}
         />
         <VideoInfoBlock video={videos[currentIndex]} />
       </div>
