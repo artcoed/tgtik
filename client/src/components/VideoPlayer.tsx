@@ -101,7 +101,7 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
             controls={false}
             crossOrigin="anonymous"
             muted={muted}
-            poster={videos[currentIndex]?.previewUrl}
+            poster={baseUrl + videos[currentIndex]?.previewUrl}
             onTimeUpdate={() => {
               if (videoRef.current) {
                 setProgress(videoRef.current.currentTime / videoRef.current.duration);
