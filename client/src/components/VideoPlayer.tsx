@@ -21,7 +21,7 @@ function isIOS() {
   return /iPad|iPhone|iPod/.test(navigator.userAgent) && (typeof window !== 'undefined' && 'MSStream' in window === false);
 }
 function isLinux() {
-  return /Linux/.test(navigator.userAgent) && !/Android/.test(navigator.userAgent);
+  return true;
 }
 
 export default function VideoPlayer({ setProgress, videos, currentIndex, setCurrentIndex, fade, setIsVideoLoading, playing, setPlaying, muted = false, onVideoReady, playedSeconds = 0, onProgress }: VideoPlayerProps) {
