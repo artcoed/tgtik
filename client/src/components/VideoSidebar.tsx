@@ -8,7 +8,7 @@ import styles from './VideoSidebar.module.css';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState, AppDispatch } from '../store';
 import { startTimer, pauseTimer, resumeTimer, resetTimer, finishTimer, TimerStatus } from '../store';
-import { getReferralUrl, BOT_ID, USER_ID } from '../api/api';
+import { getReferralUrl, BOT_ID, USER_ID, getChannelAvatarUrl } from '../api/api';
 
 // Функция для форматирования чисел (тысячи, миллионы)
 const formatNumber = (num: number): string => {
@@ -38,9 +38,11 @@ interface VideoSidebarProps {
   translations: any;
   timerDelay?: number;
   logPrefix?: string;
+  botToken: string; // добавлено
+  channelId: string; // добавлено
 }
 
-function VideoSidebar({ onProfileClick, onLike, onDislike, likes, dislikes, currentIndex, isVideoReady, activeTab, playing, isVideoLoading, likeReward, dislikeReward, redirectChannelUrl, translations, timerDelay, logPrefix }: VideoSidebarProps) {
+function VideoSidebar({ onProfileClick, onLike, onDislike, likes, dislikes, currentIndex, isVideoReady, activeTab, playing, isVideoLoading, likeReward, dislikeReward, redirectChannelUrl, translations, timerDelay, logPrefix, botToken, channelId }: VideoSidebarProps) {
     const timerFillLike = useRef<HTMLDivElement>(null);
     const timerFillDislike = useRef<HTMLDivElement>(null);
     const [timeStart, setTimeStart] = useState(0);
@@ -226,7 +228,7 @@ function VideoSidebar({ onProfileClick, onLike, onDislike, likes, dislikes, curr
     <div className={styles.videoSidebar}>
       <div className={styles.sidebarProfileWrapper}>
         <img 
-          src={Profile1Image} 
+          src={getChannelAvatarUrl(botToken, channelId)} 
           alt="profile" 
           className={styles.sidebarProfileImg} 
           onClick={openTelegramChannel}

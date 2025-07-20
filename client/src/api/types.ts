@@ -26,7 +26,7 @@ export type Video = {
     hashtags: string;
     description: string;
     profileId: string;
-    profilePicUrl?: string;
+    profileLogoUrl: string;
     likes: number;
     dislikes: number;
     dislikeReward: number
