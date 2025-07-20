@@ -37,7 +37,8 @@ function HomePage({ onSelect, activeTab, setMoney, showToast, showErrorModal, se
   const [isVideoLoading, setIsVideoLoading] = useState(true);
   const [isVideoReady, setIsVideoReady] = useState(false);
   const [timerFinished, setTimerFinished] = useState(false);
-  const [playing, setPlaying] = useState(true);
+  const [playing, setPlaying] = useState(false); // теперь по умолчанию пауза
+  const [isFirstPlay, setIsFirstPlay] = useState(true); // для первого запуска
   const dispatch = useDispatch<AppDispatch>();
   const balance = useSelector((state: RootState) => state.balance.value);
   const channelUrl = useSelector((state: RootState) => state.channel.inviteLink);
@@ -436,13 +437,14 @@ function HomePage({ onSelect, activeTab, setMoney, showToast, showErrorModal, se
         setIsVideoLoading={setIsVideoLoading}
         playing={playing}
         setPlaying={setPlaying}
-        muted={rate >= maxVideos}
+        muted={!playing || isFirstPlay} // mute если пауза или первый запуск
         onVideoReady={() => {
           setIsVideoReady(true);
-          if (!playing) setPlaying(true);
+          if (!playing) setPlaying(false);
         }}
         playedSeconds={activeTab === 'home' ? playedSeconds : 0}
         onProgress={handleProgress}
+        setIsFirstPlay={setIsFirstPlay} // новый проп
       />
       <VideoProgressBar progress={progress} />
       <VideoTopBar onGiftClick={handleGiftClick} rate={rate} maxVideos={maxVideos} onProfileClick={handleOpenProfile} translations={translations} hideGiftIcon={hasBonus}/>

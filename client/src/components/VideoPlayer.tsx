@@ -15,37 +15,27 @@ interface VideoPlayerProps {
   onVideoReady?: () => void;
   playedSeconds?: number;
   onProgress?: (state: { playedSeconds: number }) => void;
+  setIsFirstPlay?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export default function VideoPlayer({ setProgress, videos, currentIndex, setCurrentIndex, fade, setIsVideoLoading, playing, setPlaying, muted = false, onVideoReady, playedSeconds = 0, onProgress }: VideoPlayerProps) {
+export default function VideoPlayer({ setProgress, videos, currentIndex, setCurrentIndex, fade, setIsVideoLoading, playing, setPlaying, muted = false, onVideoReady, playedSeconds = 0, onProgress, setIsFirstPlay }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const lastSeekRef = useRef<number>(-1);
   const shouldSeekRef = useRef(false);
-  const [isMuted, setIsMuted] = React.useState(muted);
-  const [isActuallyPlaying, setIsActuallyPlaying] = React.useState(false);
-
-  useEffect(() => {
-    setIsMuted(muted); // сбрасываем mute при смене видео
-    setIsActuallyPlaying(false); // сбрасываем флаг при смене видео
-  }, [muted, currentIndex]);
 
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.currentTime = 0;
-      // Не автозапускаем видео при первом показе (playing=false)
-      if (playing) {
-        videoRef.current.play().catch((err) => {
-          if (err.name !== 'AbortError') {
-            console.error('Video play error:', err);
-          }
-        });
-      }
+      videoRef.current.play().catch((err) => {
+        if (err.name !== 'AbortError') {
+          console.error('Video play error:', err);
+        }
+      });
     }
     setIsVideoLoading(true);
     lastSeekRef.current = -1;
     shouldSeekRef.current = false;
-    setIsActuallyPlaying(false); // сбрасываем при смене видео
-  }, [currentIndex, setIsVideoLoading, playing]);
+  }, [currentIndex, setIsVideoLoading]);
 
   // Seek to playedSeconds when it changes (if different from current)
   useEffect(() => {
@@ -80,13 +70,6 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
     }
   }, [playing]);
 
-  // Управляем mute на самом элементе
-  useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.muted = isMuted;
-    }
-  }, [isMuted]);
-
   return (
     <div style={{
       transition: 'opacity 0.3s',
@@ -106,7 +89,7 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
           playsInline={true}
           controls={false}
           crossOrigin="anonymous"
-          muted={isMuted}
+          muted={muted}
           onTimeUpdate={() => {
             if (videoRef.current) {
               setProgress(videoRef.current.currentTime / videoRef.current.duration);
@@ -115,37 +98,31 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
               }
             }
           }}
-          autoPlay={false} // всегда false, чтобы не автозапускалось
+          autoPlay={playing}
           onClick={() => {
             if (videoRef.current) {
-              if (isActuallyPlaying) {
+              if (playing) {
                 videoRef.current.pause();
-                // onPause сам вызовет setIsActuallyPlaying и setPlaying
+                setPlaying(false);
               } else {
-                setIsMuted(false);
                 videoRef.current.play().catch((err) => {
                   if (err.name !== 'AbortError') {
                     console.error('Video play error:', err);
                   }
                 });
-                // onPlay сам вызовет setIsActuallyPlaying и setPlaying
+                setPlaying(true);
+                if (setIsFirstPlay) setIsFirstPlay(false); // снимаем mute при первом play
               }
             }
-          }}
-          onPlay={() => {
-            setIsActuallyPlaying(true);
-            setPlaying(true);
-          }}
-          onPause={() => {
-            setIsActuallyPlaying(false);
-            setPlaying(false);
           }}
           onEnded={() => {
             if (videoRef.current) {
               videoRef.current.currentTime = 0;
-              videoRef.current.pause();
-              setIsActuallyPlaying(false);
-              setPlaying(false);
+              videoRef.current.play().catch((err) => {
+                if (err.name !== 'AbortError') {
+                  console.error('Video play error:', err);
+                }
+              });
             }
           }}
           onLoadStart={() => setIsVideoLoading(true)}
@@ -158,7 +135,9 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
               lastSeekRef.current = playedSeconds;
               shouldSeekRef.current = false;
             }
-            // Не автозапускаем видео
+            if (playing && videoRef.current && videoRef.current.paused) {
+              videoRef.current.play().catch(() => {});
+            }
           }}
           style={{
             width: '100%',
@@ -170,29 +149,6 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
           }}
         />
       ) : null}
-      {/* Overlay pause icon */}
-      {!isActuallyPlaying && (
-        <div style={{
-          position: 'absolute',
-          left: 0,
-          top: 0,
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: 'rgba(0,0,0,0.2)',
-          zIndex: 2,
-          pointerEvents: 'none',
-        }}>
-          {/* SVG pause icon */}
-          <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="40" cy="40" r="40" fill="rgba(0,0,0,0.5)"/>
-            <rect x="26" y="24" width="8" height="32" rx="3" fill="#fff"/>
-            <rect x="46" y="24" width="8" height="32" rx="3" fill="#fff"/>
-          </svg>
-        </div>
-      )}
       {/* Loader is now handled by parent via isVideoLoading state */}
     </div>
   );
