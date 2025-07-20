@@ -17,43 +17,32 @@ interface VideoPlayerProps {
   onProgress?: (state: { playedSeconds: number }) => void;
 }
 
-function isIOS() {
-  return /iPad|iPhone|iPod/.test(navigator.userAgent) && (typeof window !== 'undefined' && 'MSStream' in window === false);
-}
-function isLinux() {
-  return true;
-}
-
 export default function VideoPlayer({ setProgress, videos, currentIndex, setCurrentIndex, fade, setIsVideoLoading, playing, setPlaying, muted = false, onVideoReady, playedSeconds = 0, onProgress }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const lastSeekRef = useRef<number>(-1);
   const shouldSeekRef = useRef(false);
-  const isIOSDevice = isIOS();
-  const isLinuxDevice = isLinux();
-  const shouldMute = isIOSDevice || isLinuxDevice;
-  const shouldPauseInitially = isIOSDevice || isLinuxDevice;
+  const [isMuted, setIsMuted] = React.useState(muted);
+
+  useEffect(() => {
+    setIsMuted(muted); // сбрасываем mute при смене видео
+  }, [muted, currentIndex]);
 
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.currentTime = 0;
-      if (shouldPauseInitially) {
-        videoRef.current.pause();
-        videoRef.current.muted = true;
-        setPlaying(false);
-      } else {
-        videoRef.current.muted = false;
+      // Не автозапускаем видео при первом показе (playing=false)
+      if (playing) {
         videoRef.current.play().catch((err) => {
           if (err.name !== 'AbortError') {
             console.error('Video play error:', err);
           }
         });
-        setPlaying(true);
       }
     }
     setIsVideoLoading(true);
     lastSeekRef.current = -1;
     shouldSeekRef.current = false;
-  }, [currentIndex, setIsVideoLoading]);
+  }, [currentIndex, setIsVideoLoading, playing]);
 
   // Seek to playedSeconds when it changes (if different from current)
   useEffect(() => {
@@ -73,13 +62,11 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
     }
   }, [playedSeconds]);
 
+  // Ставим/снимаем паузу у видео при изменении playing
   useEffect(() => {
     if (videoRef.current) {
       if (playing) {
         if (videoRef.current.paused) {
-          if (shouldMute && videoRef.current.muted) {
-            videoRef.current.muted = false;
-          }
           videoRef.current.play().catch(() => {});
         }
       } else {
@@ -88,7 +75,14 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
         }
       }
     }
-  }, [playing, shouldMute]);
+  }, [playing]);
+
+  // Управляем mute на самом элементе
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.muted = isMuted;
+    }
+  }, [isMuted]);
 
   return (
     <div style={{
@@ -109,7 +103,7 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
           playsInline={true}
           controls={false}
           crossOrigin="anonymous"
-          muted={shouldMute}
+          muted={isMuted}
           onTimeUpdate={() => {
             if (videoRef.current) {
               setProgress(videoRef.current.currentTime / videoRef.current.duration);
@@ -121,16 +115,17 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
           autoPlay={playing}
           onClick={() => {
             if (videoRef.current) {
-              if (playing) {
-                videoRef.current.pause();
-                setPlaying(false);
-              } else {
+              if (!playing) {
+                setIsMuted(false); // включаем звук при первом клике
+                setPlaying(true);
                 videoRef.current.play().catch((err) => {
                   if (err.name !== 'AbortError') {
                     console.error('Video play error:', err);
                   }
                 });
-                setPlaying(true);
+              } else {
+                videoRef.current.pause();
+                setPlaying(false);
               }
             }
           }}
@@ -168,6 +163,29 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
           }}
         />
       ) : null}
+      {/* Overlay pause icon */}
+      {!playing && (
+        <div style={{
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'rgba(0,0,0,0.2)',
+          zIndex: 2,
+          pointerEvents: 'none',
+        }}>
+          {/* SVG pause icon */}
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="40" cy="40" r="40" fill="rgba(0,0,0,0.5)"/>
+            <rect x="26" y="24" width="8" height="32" rx="3" fill="#fff"/>
+            <rect x="46" y="24" width="8" height="32" rx="3" fill="#fff"/>
+          </svg>
+        </div>
+      )}
       {/* Loader is now handled by parent via isVideoLoading state */}
     </div>
   );
