@@ -22,18 +22,19 @@ export type GetProfileResponse = {
 }
 
 export type Video = {
-    id: number;
-    url: string;
-    hashtags: string;
-    description: string;
-    profileId: string;
-    profileLogoUrl: string;
-    likes: number;
-    dislikes: number;
-    dislikeReward: number
-    likeReward: number
-    redirectChannelUrl: string
-}
+  id: number;
+  url: string;
+  hashtags: string;
+  description: string;
+  profileId: string;
+  likeReward: number;
+  dislikeReward: number;
+  likes: number;
+  dislikes: number;
+  redirectChannelUrl: string;
+  profileLogoUrl?: string;
+  previewUrl?: string;
+};
 
 export type GetRateWithBalanceResponse = {
     balance: number

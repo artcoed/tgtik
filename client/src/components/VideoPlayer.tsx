@@ -95,6 +95,7 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
             controls={false}
             crossOrigin="anonymous"
             muted={muted}
+            poster={videos[currentIndex]?.previewUrl}
             onTimeUpdate={() => {
               if (videoRef.current) {
                 setProgress(videoRef.current.currentTime / videoRef.current.duration);
@@ -146,20 +147,6 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
               }
               if (playing && videoRef.current && videoRef.current.paused) {
                 videoRef.current.play().catch(() => {});
-              }
-              // Ставим на паузу после первого кадра при первом показе
-              if (isFirstPlay && setIsFirstPlay && !wasFirstPause.current) {
-                wasFirstPause.current = true;
-                // Гарантируем показ первого кадра: программно play+pause
-                if (videoRef.current) {
-                  videoRef.current.play().then(() => {
-                    videoRef.current && videoRef.current.pause();
-                  }).catch(() => {});
-                }
-                setTimeout(() => {
-                  setPlaying(false);
-                  setIsFirstPlay(false);
-                }, 0);
               }
               // Если пользователь кликнул play до готовности видео, включаем проигрывание сейчас
               if (playRequested.current) {
