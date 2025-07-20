@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { Video as VideoType } from '../api/types';
 import Loader from './Loader';
-import PauseIcon from '../assets/PauseIcon.svg';
+import resumeIcon from '../assets/resumeIcon.png';
 
 interface VideoPlayerProps {
   setProgress: (v: number) => void;
@@ -150,24 +150,24 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
               cursor: 'pointer',
             }}
           />
-          {/* Иконка паузы поверх видео */}
-          <img
-            src={PauseIcon}
-            alt="Pause"
-            style={{
-              position: 'absolute',
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: 80,
-              height: 80,
-              opacity: playing ? 0 : 1,
-              pointerEvents: 'none',
-              transition: 'opacity 0.3s',
-              zIndex: 10,
-              filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))',
-            }}
-          />
+          {!playing && (
+            <img
+              src={resumeIcon}
+              alt="Resume"
+              style={{
+                position: 'absolute',
+                left: '50%',
+                top: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: 64,
+                height: 64,
+                pointerEvents: 'none',
+                zIndex: 2,
+                opacity: 0.9,
+                filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.5))',
+              }}
+            />
+          )}
         </>
       ) : null}
       {/* Loader is now handled by parent via isVideoLoading state */}
