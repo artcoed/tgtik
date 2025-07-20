@@ -126,7 +126,7 @@ function HomePage({ onSelect, activeTab, setMoney, showToast, showErrorModal, se
         setVideos(response.data);
         setReward({ likeReward: firstVideo.likeReward, dislikeReward: firstVideo.dislikeReward})
         setCurrentIndex(0);
-        setPlaying(true);
+        setPlaying(false);
         setIsVideoReady(false);
       }
     } catch (error) {
