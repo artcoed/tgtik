@@ -3,7 +3,8 @@ import { GetIsRegisterdResponse, GetProfileResponse, GetRateWithBalanceResponse,
 import { getTelegramData, getBotId, getUserId, getCountry, isTelegramWebApp } from "../utils/telegram";
 import { store } from '../store';
 
-const baseUrl = process.env.NODE_ENV === 'production' ? '/' : 'http://localhost/'
+// const baseUrl = process.env.NODE_ENV === 'production' ? '/' : 'http://localhost/'
+const baseUrl = 'http://localhost/'
 
 const api = axios.create({
     withCredentials: true,
