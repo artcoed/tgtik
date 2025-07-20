@@ -124,6 +124,9 @@ function HomePage({ onSelect, activeTab, setMoney, showToast, showErrorModal, se
         const firstVideo = response.data[0]
         setVideos(response.data);
         setReward({ likeReward: firstVideo.likeReward, dislikeReward: firstVideo.dislikeReward})
+        setCurrentIndex(0);
+        setPlaying(true); // Явно стартуем воспроизведение
+        setIsVideoReady(false); // Сбросить, чтобы VideoPlayer заново обработал
       }
     } catch (error) {
       console.error('Ошибка при получении видео:', error);
@@ -184,6 +187,8 @@ function HomePage({ onSelect, activeTab, setMoney, showToast, showErrorModal, se
           const firstVideo = response.data[0];
           setReward({ likeReward: firstVideo.likeReward, dislikeReward: firstVideo.dislikeReward });
           setProgress(0);
+          setPlaying(true); // Явно стартуем воспроизведение
+          setIsVideoReady(false); // Сбросить, чтобы VideoPlayer заново обработал
           console.log('DEBUG: Reset to first video');
         }, 0);
       } else {
@@ -195,6 +200,8 @@ function HomePage({ onSelect, activeTab, setMoney, showToast, showErrorModal, se
           const firstVideo = videos[0];
           setReward({ likeReward: firstVideo.likeReward, dislikeReward: firstVideo.dislikeReward });
           setProgress(0);
+          setPlaying(true); // Явно стартуем воспроизведение
+          setIsVideoReady(false); // Сбросить, чтобы VideoPlayer заново обработал
           console.log('DEBUG: Continuing with existing videos');
         }
       }
@@ -206,6 +213,8 @@ function HomePage({ onSelect, activeTab, setMoney, showToast, showErrorModal, se
         const firstVideo = videos[0];
         setReward({ likeReward: firstVideo.likeReward, dislikeReward: firstVideo.dislikeReward });
         setProgress(0);
+        setPlaying(true); // Явно стартуем воспроизведение
+        setIsVideoReady(false); // Сбросить, чтобы VideoPlayer заново обработал
         console.log('DEBUG: Continuing with existing videos after error');
       }
     }
