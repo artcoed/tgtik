@@ -22,9 +22,11 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
   const lastSeekRef = useRef<number>(-1);
   const shouldSeekRef = useRef(false);
   const [isMuted, setIsMuted] = React.useState(muted);
+  const [isActuallyPlaying, setIsActuallyPlaying] = React.useState(false);
 
   useEffect(() => {
     setIsMuted(muted); // сбрасываем mute при смене видео
+    setIsActuallyPlaying(false); // сбрасываем флаг при смене видео
   }, [muted, currentIndex]);
 
   useEffect(() => {
@@ -42,6 +44,7 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
     setIsVideoLoading(true);
     lastSeekRef.current = -1;
     shouldSeekRef.current = false;
+    setIsActuallyPlaying(false); // сбрасываем при смене видео
   }, [currentIndex, setIsVideoLoading, playing]);
 
   // Seek to playedSeconds when it changes (if different from current)
@@ -112,31 +115,39 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
               }
             }
           }}
-          autoPlay={playing}
+          autoPlay={false} // всегда false, чтобы не автозапускалось
           onClick={() => {
             if (videoRef.current) {
-              if (!playing) {
+              if (!isActuallyPlaying) {
                 setIsMuted(false); // включаем звук при первом клике
-                setPlaying(true);
-                videoRef.current.play().catch((err) => {
+                videoRef.current.play().then(() => {
+                  // setIsActuallyPlaying будет вызван в onPlay
+                }).catch((err) => {
                   if (err.name !== 'AbortError') {
                     console.error('Video play error:', err);
                   }
                 });
               } else {
                 videoRef.current.pause();
+                setIsActuallyPlaying(false);
                 setPlaying(false);
               }
             }
           }}
+          onPlay={() => {
+            setIsActuallyPlaying(true);
+            setPlaying(true);
+          }}
+          onPause={() => {
+            setIsActuallyPlaying(false);
+            setPlaying(false);
+          }}
           onEnded={() => {
             if (videoRef.current) {
               videoRef.current.currentTime = 0;
-              videoRef.current.play().catch((err) => {
-                if (err.name !== 'AbortError') {
-                  console.error('Video play error:', err);
-                }
-              });
+              videoRef.current.pause();
+              setIsActuallyPlaying(false);
+              setPlaying(false);
             }
           }}
           onLoadStart={() => setIsVideoLoading(true)}
@@ -149,9 +160,7 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
               lastSeekRef.current = playedSeconds;
               shouldSeekRef.current = false;
             }
-            if (playing && videoRef.current && videoRef.current.paused) {
-              videoRef.current.play().catch(() => {});
-            }
+            // Не автозапускаем видео
           }}
           style={{
             width: '100%',
@@ -164,7 +173,7 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
         />
       ) : null}
       {/* Overlay pause icon */}
-      {!playing && (
+      {!isActuallyPlaying && (
         <div style={{
           position: 'absolute',
           left: 0,
