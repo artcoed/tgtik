@@ -18,6 +18,7 @@ export type GetProfileResponse = {
     likes: number
     dislikes: number,
     earnings: number
+    avatarUrl?: string
 }
 
 export type Video = {

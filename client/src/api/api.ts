@@ -130,11 +130,6 @@ const getBotStart = (botId: string) => {
     return api.get<BotStartResponse>(`/api/bot/start?botId=${botId}`);
 };
 
-// Получить полный путь к аватару канала Telegram
-export function getChannelAvatarUrl(botToken: string, channelId: string): string {
-  return `${baseUrl}api/channel-avatar/${botToken}/${channelId}`;
-}
-
 // Функции-обертки, которые автоматически используют текущие ID
 const getIsRegisteredCurrent = () => getIsRegistered(getCurrentBotId(), getCurrentUserId());
 const registerCurrent = (data: Omit<RegisterRequest, 'botId' | 'userId'>) => {

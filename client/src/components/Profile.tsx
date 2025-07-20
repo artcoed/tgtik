@@ -22,7 +22,7 @@ interface ProfileProps {
 
 const Profile: React.FC<ProfileProps> = ({
   username = '@hunkyfoxx',
-  avatarUrl = Profile1Image,
+  avatarUrl,
   registrationDate = '30.06.2025',
   friendsInvited = 0,
   likes = 1,
@@ -89,7 +89,7 @@ const Profile: React.FC<ProfileProps> = ({
         <div className={styles.profileContent}>
           <img 
             className={styles.profileAvatar} 
-            src={avatarUrl} 
+            src={avatarUrl || Profile1Image} 
             alt={translations.profileAvatar || 'Profile avatar'} 
             onClick={openTelegramChannel}
           />

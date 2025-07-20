@@ -405,6 +405,7 @@ function HomePage({ onSelect, activeTab, setMoney, showToast, showErrorModal, se
       {profile && (
         <Profile 
           username={profile.username}
+          avatarUrl={profile.avatarUrl} // Новый проп для динамической аватарки
           registrationDate={profile.registrationDate ? new Date(profile.registrationDate).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }) : ''}
           friendsInvited={profile.invitedFriends}
           likes={profile.likes}
@@ -443,22 +444,21 @@ function HomePage({ onSelect, activeTab, setMoney, showToast, showErrorModal, se
           key={currentIndex}
           onLike={handleLike}
           onDislike={handleDislike}
-          likes={videos[currentIndex]?.likes || 0}
-          dislikes={videos[currentIndex]?.dislikes || 0}
+          likes={videos[currentIndex]?.likes}
+          dislikes={videos[currentIndex]?.dislikes}
           rate={rate}
           likeReward={reward.likeReward}
-          dislikeReward={reward.dislikeReward}
+          dislikeReward={reward?.dislikeReward}
           isVideoReady={isVideoReady}
           currentIndex={currentIndex}
           activeTab={activeTab}
           playing={playing}
           isVideoLoading={isVideoLoading}
-          redirectChannelUrl={videos[currentIndex]?.redirectChannelUrl || ''}
+          redirectChannelUrl={videos[currentIndex]?.redirectChannelUrl}
           translations={translations}
-          timerDelay={timerDelay}
-          logPrefix={'[HomePage]'}
-          botToken={botId || ''}
-          channelId={videos[currentIndex]?.profileId || ''}
+          timerDelay={timerDelay || 3000}
+          logPrefix={'[VideoSidebar]'}
+          profileLogoUrl={videos[currentIndex]?.profileLogoUrl} // Новый проп
         />
         <VideoInfoBlock video={videos[currentIndex]} />
       </div>
