@@ -17,19 +17,38 @@ interface VideoPlayerProps {
   onProgress?: (state: { playedSeconds: number }) => void;
 }
 
+function isIOS() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && (typeof window !== 'undefined' && 'MSStream' in window === false);
+}
+function isLinux() {
+  return /Linux/.test(navigator.userAgent) && !/Android/.test(navigator.userAgent);
+}
+
 export default function VideoPlayer({ setProgress, videos, currentIndex, setCurrentIndex, fade, setIsVideoLoading, playing, setPlaying, muted = false, onVideoReady, playedSeconds = 0, onProgress }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const lastSeekRef = useRef<number>(-1);
   const shouldSeekRef = useRef(false);
+  const isIOSDevice = isIOS();
+  const isLinuxDevice = isLinux();
+  const shouldMute = isIOSDevice || isLinuxDevice;
+  const shouldPauseInitially = isIOSDevice || isLinuxDevice;
 
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.currentTime = 0;
-      videoRef.current.play().catch((err) => {
-        if (err.name !== 'AbortError') {
-          console.error('Video play error:', err);
-        }
-      });
+      if (shouldPauseInitially) {
+        videoRef.current.pause();
+        videoRef.current.muted = true;
+        setPlaying(false);
+      } else {
+        videoRef.current.muted = false;
+        videoRef.current.play().catch((err) => {
+          if (err.name !== 'AbortError') {
+            console.error('Video play error:', err);
+          }
+        });
+        setPlaying(true);
+      }
     }
     setIsVideoLoading(true);
     lastSeekRef.current = -1;
@@ -54,11 +73,13 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
     }
   }, [playedSeconds]);
 
-  // Ставим/снимаем паузу у видео при изменении playing
   useEffect(() => {
     if (videoRef.current) {
       if (playing) {
         if (videoRef.current.paused) {
+          if (shouldMute && videoRef.current.muted) {
+            videoRef.current.muted = false;
+          }
           videoRef.current.play().catch(() => {});
         }
       } else {
@@ -67,7 +88,7 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
         }
       }
     }
-  }, [playing]);
+  }, [playing, shouldMute]);
 
   return (
     <div style={{
@@ -88,7 +109,7 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
           playsInline={true}
           controls={false}
           crossOrigin="anonymous"
-          muted={true}
+          muted={shouldMute}
           onTimeUpdate={() => {
             if (videoRef.current) {
               setProgress(videoRef.current.currentTime / videoRef.current.duration);

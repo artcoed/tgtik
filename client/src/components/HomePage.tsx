@@ -125,8 +125,8 @@ function HomePage({ onSelect, activeTab, setMoney, showToast, showErrorModal, se
         setVideos(response.data);
         setReward({ likeReward: firstVideo.likeReward, dislikeReward: firstVideo.dislikeReward})
         setCurrentIndex(0);
-        setPlaying(true); // Явно стартуем воспроизведение
-        setIsVideoReady(false); // Сбросить, чтобы VideoPlayer заново обработал
+        setPlaying(true);
+        setIsVideoReady(false);
       }
     } catch (error) {
       console.error('Ошибка при получении видео:', error);

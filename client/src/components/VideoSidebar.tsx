@@ -38,7 +38,7 @@ interface VideoSidebarProps {
   translations: any;
   timerDelay?: number;
   logPrefix?: string;
-  profileLogoUrl?: string; // Новый проп для динамической картинки
+  profileLogoUrl?: string;
 }
 
 function VideoSidebar({ onProfileClick, onLike, onDislike, likes, dislikes, currentIndex, isVideoReady, activeTab, playing, isVideoLoading, likeReward, dislikeReward, redirectChannelUrl, translations, timerDelay, logPrefix, profileLogoUrl }: VideoSidebarProps) {
