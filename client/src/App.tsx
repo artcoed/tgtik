@@ -20,6 +20,7 @@ import { AxiosError } from "axios";
 import { initTelegramWebApp } from './utils/telegram';
 import { api } from './api/api';
 import { baseUrl } from './api/api';
+import { getCloudItem, setCloudItem } from './utils/cloudStorage';
 
 function BackgroundModal({ open, onClose, children }: { open: boolean, onClose: () => void, children: React.ReactNode }) {
   const [animate, setAnimate] = useState(false);
@@ -264,13 +265,15 @@ export default function App() {
     }
   }, [isOpenBackgroundModal, pendingTab]);
 
-  // Восстановление токена из localStorage при старте
+  // Восстановление токена из CloudStorage при старте
   useEffect(() => {
-    const token = localStorage.getItem('jwt');
-    const user = localStorage.getItem('user');
-    if (token && user) {
-      dispatch(setAuth({ token, user: JSON.parse(user) }));
-    }
+    (async () => {
+      const token = await getCloudItem('jwt');
+      const user = await getCloudItem('user');
+      if (token && user) {
+        dispatch(setAuth({ token, user: JSON.parse(user) }));
+      }
+    })();
   }, [dispatch]);
 
   useEffect(() => {
@@ -279,10 +282,10 @@ export default function App() {
       const initData = window.Telegram.WebApp.initData;
       const botId = getBotId();
       api.post(`${baseUrl}api/auth`, { initData, botId })
-        .then((res) => {
+        .then(async (res) => {
           const { token, user } = res.data;
-          localStorage.setItem("jwt", token);
-          localStorage.setItem("user", JSON.stringify(user));
+          await setCloudItem("jwt", token);
+          await setCloudItem("user", JSON.stringify(user));
           dispatch(setAuth({ token, user }));
         })
         .catch((err) => {

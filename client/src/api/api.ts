@@ -2,6 +2,7 @@ import axios from "axios";
 import { GetIsRegisterdResponse, GetProfileResponse, GetRateWithBalanceResponse, RegisterRequest, Video, UserActionRequest, BotStartResponse } from "./types";
 import { getTelegramData, getBotId, getUserId, getCountry, isTelegramWebApp } from "../utils/telegram";
 import { store } from '../store';
+import { getCloudItem } from '../utils/cloudStorage';
 
 const baseUrl = 'http://localhost/'
 
@@ -11,9 +12,8 @@ const api = axios.create({
 })
 
 api.interceptors.request.use(
-  (config) => {
-    // Сначала пробуем взять токен из localStorage
-    let token = localStorage.getItem('jwt');
+  async (config) => {
+    let token = await getCloudItem('jwt');
     // Если нет — fallback на redux (например, после логаута)
     if (!token) {
       token = store.getState().auth.token;
