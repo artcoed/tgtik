@@ -185,8 +185,7 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
               height: 82,
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.5))',
+              justifyContent: 'center'
             }}
           >
             <img
