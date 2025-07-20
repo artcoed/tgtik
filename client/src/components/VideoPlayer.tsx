@@ -85,8 +85,10 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
           src={videos[currentIndex].url}
           width="100%"
           height="100%"
+          playsInline={true}
           controls={false}
-          muted={muted}
+          crossOrigin="anonymous"
+          muted={true}
           onTimeUpdate={() => {
             if (videoRef.current) {
               setProgress(videoRef.current.currentTime / videoRef.current.duration);
