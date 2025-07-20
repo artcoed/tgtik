@@ -11,21 +11,21 @@ const api = axios.create({
 })
 
 api.interceptors.request.use(
-  (config) => {
-    // Сначала пробуем взять токен из localStorage
-    let token = localStorage.getItem('jwt');
-    // Если нет — fallback на redux (например, после логаута)
-    if (!token) {
-      token = store.getState().auth.token;
-    }
-    if (token) {
-      config.headers = config.headers || {};
-      config.headers['Authorization'] = `Bearer ${token}`;
-    }
-    console.log('[API] Request:', config.url, 'Authorization:', config.headers?.Authorization);
-    return config;
-  },
-  (error) => Promise.reject(error)
+    (config) => {
+        // Сначала пробуем взять токен из localStorage
+        let token = localStorage.getItem('jwt');
+        // Если нет — fallback на redux (например, после логаута)
+        if (!token) {
+            token = store.getState().auth.token;
+        }
+        if (token) {
+            config.headers = config.headers || {};
+            config.headers['Authorization'] = `Bearer ${token}`;
+        }
+        console.log('[API] Request:', config.url, 'Authorization:', config.headers?.Authorization);
+        return config;
+    },
+    (error) => Promise.reject(error)
 );
 
 // Функции для получения BOT_ID и USER_ID из Telegram WebApp
@@ -93,7 +93,7 @@ const getIsSubscribed = (botId: string, userId: string) => {
 
 const getReferralUrl = (botId: string, userId: string) => {
     return api.get<{status: 'success',
-    referralLink: string}>(`/api/webapp/${botId}/referral/${userId}`);
+        referralLink: string}>(`/api/webapp/${botId}/referral/${userId}`);
 }
 
 const getReferrals = (botId: string, userId: string) => {
@@ -103,7 +103,7 @@ const getReferrals = (botId: string, userId: string) => {
 }
 
 const getCanWithdraw = (botId: string, userId: string) => {
-  return api.get<{ canWithdraw: boolean, withdrawalLimit: number }>(`/api/webapp/${botId}/canWithdraw/${userId}`);
+    return api.get<{ canWithdraw: boolean, withdrawalLimit: number }>(`/api/webapp/${botId}/canWithdraw/${userId}`);
 }
 
 const withdraw = (botId: string, userId: string, amount: number, cardNumber: string) => {
