@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { Video as VideoType } from '../api/types';
 import Loader from './Loader';
-import playIcon from '../assets/playIcon.svg';
+import playIcon from '../assets/playIcon2.svg';
 
 interface VideoPlayerProps {
   setProgress: (v: number) => void;
@@ -150,6 +150,12 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
               // Ставим на паузу после первого кадра при первом показе
               if (isFirstPlay && setIsFirstPlay && !wasFirstPause.current) {
                 wasFirstPause.current = true;
+                // Гарантируем показ первого кадра: программно play+pause
+                if (videoRef.current) {
+                  videoRef.current.play().then(() => {
+                    videoRef.current && videoRef.current.pause();
+                  }).catch(() => {});
+                }
                 setTimeout(() => {
                   setPlaying(false);
                   setIsFirstPlay(false);
@@ -185,7 +191,8 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
               height: 82,
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.5))',
             }}
           >
             <img
