@@ -118,19 +118,17 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
           autoPlay={false} // всегда false, чтобы не автозапускалось
           onClick={() => {
             if (videoRef.current) {
-              if (!isActuallyPlaying) {
-                setIsMuted(false); // включаем звук при первом клике
-                videoRef.current.play().then(() => {
-                  // setIsActuallyPlaying будет вызван в onPlay
-                }).catch((err) => {
+              if (isActuallyPlaying) {
+                videoRef.current.pause();
+                // onPause сам вызовет setIsActuallyPlaying и setPlaying
+              } else {
+                setIsMuted(false);
+                videoRef.current.play().catch((err) => {
                   if (err.name !== 'AbortError') {
                     console.error('Video play error:', err);
                   }
                 });
-              } else {
-                videoRef.current.pause();
-                setIsActuallyPlaying(false);
-                setPlaying(false);
+                // onPlay сам вызовет setIsActuallyPlaying и setPlaying
               }
             }
           }}
