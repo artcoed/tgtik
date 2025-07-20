@@ -94,7 +94,7 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
         <>
           <video
             ref={videoRef}
-            src={baseUrl + videos[currentIndex].url}
+            src={videos[currentIndex].url}
             width="100%"
             height="100%"
             playsInline={true}
