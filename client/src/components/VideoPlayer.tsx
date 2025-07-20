@@ -2,6 +2,8 @@ import React, { useRef, useEffect } from 'react';
 import { Video as VideoType } from '../api/types';
 import Loader from './Loader';
 import playIcon from '../assets/playIcon2.svg';
+import {baseUrl} from "../api/api";
+
 
 interface VideoPlayerProps {
   setProgress: (v: number) => void;
@@ -88,7 +90,7 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
         <>
           <video
             ref={videoRef}
-            src={videos[currentIndex].url}
+            src={baseUrl + videos[currentIndex].url}
             width="100%"
             height="100%"
             playsInline={true}
