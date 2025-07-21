@@ -304,6 +304,7 @@ function VideoSidebar({ onProfileClick, onLike, onDislike, likes, dislikes, curr
           if (typeof isVideoLimitReached !== 'undefined' && isVideoLimitReached && typeof showVideoLimitModal === 'function') {
             showVideoLimitModal();
             dispatch(resetTimer());
+            setIsBlocked(false); // Сбросить блокировку для дизлайка
             return;
           }
           if (timerStatus === 'finished') {
@@ -318,6 +319,7 @@ function VideoSidebar({ onProfileClick, onLike, onDislike, likes, dislikes, curr
               setRewardLikeFlyOut(false);
               setRewardDislikeFlyOut(false);
               dispatch(resetTimer());
+              setIsBlocked(false); // Сбросить блокировку после анимации
             }, 500);
           }
         }}
