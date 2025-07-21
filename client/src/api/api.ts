@@ -1,10 +1,11 @@
 import axios from "axios";
 import { GetIsRegisterdResponse, GetProfileResponse, GetRateWithBalanceResponse, RegisterRequest, Video, UserActionRequest, BotStartResponse } from "./types";
+import { VideoResponse } from './types';
 import { getTelegramData, getBotId, getUserId, getCountry, isTelegramWebApp } from "../utils/telegram";
 import { store } from '../store';
 import { getCloudItem } from '../utils/cloudStorage';
 
-const baseUrl = 'http://localhost/'
+const baseUrl = process.env.NODE_ENV === 'production' ? '/' : 'http://localhost/'
 
 const api = axios.create({
     withCredentials: true,
@@ -72,7 +73,7 @@ const getProfile = (botId: string, userId: string) => {
 }
 
 const getVideos = (botId: string, userId: string) => {
-    return api.get<Video[]>(`/api/bot/${botId}/videos/${userId}`)
+    return api.get<VideoResponse>(`/api/bot/${botId}/videos/${userId}`)
 }
 
 const getRateWithBalance = (botId: string, userId: string) => {

@@ -36,6 +36,8 @@ export type Video = {
   previewUrl?: string;
 };
 
+export type VideoResponse = Video;
+
 export type GetRateWithBalanceResponse = {
     balance: number
     rate: number

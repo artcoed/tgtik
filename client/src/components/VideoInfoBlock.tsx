@@ -6,12 +6,11 @@ import { useSelector } from 'react-redux';
 import type { RootState } from '../store';
 
 interface VideoInfoBlockProps {
-  video?: VideoType;
+  video?: VideoType | null;
 }
 
-function VideoInfoBlock({ video }: VideoInfoBlockProps) {
+export default function VideoInfoBlock({ video }: VideoInfoBlockProps) {
   const channelUrl = useSelector((state: RootState) => state.channel.inviteLink);
-
   if (!video) return null;
 
   const openTelegramChannel = () => {
@@ -44,6 +43,4 @@ function VideoInfoBlock({ video }: VideoInfoBlockProps) {
       <div className={styles.videoInfoTags}>{video.hashtags}</div>
     </div>
   );
-}
-
-export default VideoInfoBlock; 
+} 

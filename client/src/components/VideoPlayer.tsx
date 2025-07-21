@@ -7,9 +7,7 @@ import {baseUrl} from "../api/api";
 
 interface VideoPlayerProps {
   setProgress: (v: number) => void;
-  videos: VideoType[];
-  currentIndex: number;
-  setCurrentIndex: React.Dispatch<React.SetStateAction<number>>;
+  video: VideoType | null;
   fade: boolean;
   setIsVideoLoading: (loading: boolean) => void;
   playing: boolean;
@@ -22,7 +20,7 @@ interface VideoPlayerProps {
   isFirstPlay?: boolean;
 }
 
-export default function VideoPlayer({ setProgress, videos, currentIndex, setCurrentIndex, fade, setIsVideoLoading, playing, setPlaying, muted = false, onVideoReady, playedSeconds = 0, onProgress, setIsFirstPlay, isFirstPlay }: VideoPlayerProps) {
+export default function VideoPlayer({ setProgress, video, fade, setIsVideoLoading, playing, setPlaying, muted = false, onVideoReady, playedSeconds = 0, onProgress, setIsFirstPlay, isFirstPlay }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const lastSeekRef = useRef<number>(-1);
   const shouldSeekRef = useRef(false);
@@ -41,7 +39,7 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
     setIsVideoLoading(true);
     lastSeekRef.current = -1;
     shouldSeekRef.current = false;
-  }, [currentIndex, setIsVideoLoading]);
+  }, [video, setIsVideoLoading]);
 
   // Seek to playedSeconds when it changes (if different from current)
   useEffect(() => {
@@ -76,6 +74,8 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
     }
   }, [playing]);
 
+  if (!video) return null;
+
   return (
     <div style={{
       transition: 'opacity 0.3s',
@@ -90,126 +90,121 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
       userSelect: 'none',
       touchAction: 'manipulation'
     }}>
-      {videos[currentIndex]?.url ? (
-        <>
-          <video
-            ref={videoRef}
-            src={videos[currentIndex].url}
-            width="100%"
-            height="100%"
-            playsInline={true}
-            controls={false}
-            crossOrigin="anonymous"
-            muted={muted}
-            poster={baseUrl + videos[currentIndex]?.previewUrl}
-            onTimeUpdate={() => {
-              if (videoRef.current) {
-                setProgress(videoRef.current.currentTime / videoRef.current.duration);
-                if (onProgress) {
-                  onProgress({ playedSeconds: videoRef.current.currentTime });
-                }
-              }
-            }}
-            autoPlay={playing}
-            onClick={() => {
-              if (videoRef.current) {
-                if (playing) {
-                  videoRef.current.pause();
-                  setPlaying(false);
-                } else {
-                  if (videoRef.current.readyState >= 3) {
-                    videoRef.current.play().catch((err) => {
-                      if (err.name !== 'AbortError') {
-                        console.error('Video play error:', err);
-                      }
-                    });
-                    setPlaying(true);
-                    if (setIsFirstPlay) setIsFirstPlay(false);
-                  } else {
-                    playRequested.current = true;
-                  }
-                }
-              }
-            }}
-            onEnded={() => {
-              if (videoRef.current) {
-                videoRef.current.currentTime = 0;
+      <video
+        ref={videoRef}
+        src={video.url}
+        width="100%"
+        height="100%"
+        playsInline={true}
+        controls={false}
+        crossOrigin="anonymous"
+        muted={muted}
+        poster={video.previewUrl}
+        onTimeUpdate={() => {
+          if (videoRef.current) {
+            setProgress(videoRef.current.currentTime / videoRef.current.duration);
+            if (onProgress) {
+              onProgress({ playedSeconds: videoRef.current.currentTime });
+            }
+          }
+        }}
+        autoPlay={playing}
+        onClick={() => {
+          if (videoRef.current) {
+            if (playing) {
+              videoRef.current.pause();
+              setPlaying(false);
+            } else {
+              if (videoRef.current.readyState >= 3) {
                 videoRef.current.play().catch((err) => {
                   if (err.name !== 'AbortError') {
                     console.error('Video play error:', err);
                   }
                 });
-              }
-            }}
-            onLoadStart={() => setIsVideoLoading(true)}
-            onWaiting={() => setIsVideoLoading(true)}
-            onCanPlay={() => {
-              setIsVideoLoading(false);
-              if (onVideoReady) onVideoReady();
-              if (shouldSeekRef.current && videoRef.current) {
-                videoRef.current.currentTime = playedSeconds;
-                lastSeekRef.current = playedSeconds;
-                shouldSeekRef.current = false;
-              }
-              if (playing && videoRef.current && videoRef.current.paused) {
-                videoRef.current.play().catch(() => {});
-              }
-              // Если пользователь кликнул play до готовности видео, включаем проигрывание сейчас
-              if (playRequested.current) {
                 setPlaying(true);
-                playRequested.current = false;
                 if (setIsFirstPlay) setIsFirstPlay(false);
+              } else {
+                playRequested.current = true;
               }
-            }}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              display: 'block',
-              background: '#000',
-              cursor: 'pointer',
-              WebkitTouchCallout: 'none',
-              WebkitUserSelect: 'none',
-              userSelect: 'none',
-              touchAction: 'manipulation'
-            }}
-          />
-          <div
-            style={{
-              position: 'absolute',
-              left: '50%',
-              top: 'calc(50% - 84px)',
-              transform: playing ? 'translate(-50%, -50%) scale(0.7)' : 'translate(-50%, -50%) scale(1)',
-              opacity: playing ? 0 : 1,
-              transition: 'opacity 0.35s cubic-bezier(.4,0,.2,1), transform 0.35s cubic-bezier(.4,0,.2,1)',
-              pointerEvents: 'none',
-              zIndex: 2,
-              width: 82,
-              height: 82,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.5))',
-            }}
-          >
-            <img
-              src={playIcon}
-              alt="Play"
-                          style={{
-              width: 82,
-              height: 82,
-              display: 'block',
-              pointerEvents: 'none',
-              userSelect: 'none',
-              WebkitTouchCallout: 'none',
-              WebkitUserSelect: 'none',
-              touchAction: 'manipulation'
-            }}
-            />
-          </div>
-        </>
-      ) : null}
-      {/* Loader is now handled by parent via isVideoLoading state */}
+            }
+          }
+        }}
+        onEnded={() => {
+          if (videoRef.current) {
+            videoRef.current.currentTime = 0;
+            videoRef.current.play().catch((err) => {
+              if (err.name !== 'AbortError') {
+                console.error('Video play error:', err);
+              }
+            });
+          }
+        }}
+        onLoadStart={() => setIsVideoLoading(true)}
+        onWaiting={() => setIsVideoLoading(true)}
+        onCanPlay={() => {
+          setIsVideoLoading(false);
+          if (onVideoReady) onVideoReady();
+          if (shouldSeekRef.current && videoRef.current) {
+            videoRef.current.currentTime = playedSeconds;
+            lastSeekRef.current = playedSeconds;
+            shouldSeekRef.current = false;
+          }
+          if (playing && videoRef.current && videoRef.current.paused) {
+            videoRef.current.play().catch(() => {});
+          }
+          // Если пользователь кликнул play до готовности видео, включаем проигрывание сейчас
+          if (playRequested.current) {
+            setPlaying(true);
+            playRequested.current = false;
+            if (setIsFirstPlay) setIsFirstPlay(false);
+          }
+        }}
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          display: 'block',
+          background: '#000',
+          cursor: 'pointer',
+          WebkitTouchCallout: 'none',
+          WebkitUserSelect: 'none',
+          userSelect: 'none',
+          touchAction: 'manipulation'
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          left: '50%',
+          top: 'calc(50% - 84px)',
+          transform: playing ? 'translate(-50%, -50%) scale(0.7)' : 'translate(-50%, -50%) scale(1)',
+          opacity: playing ? 0 : 1,
+          transition: 'opacity 0.35s cubic-bezier(.4,0,.2,1), transform 0.35s cubic-bezier(.4,0,.2,1)',
+          pointerEvents: 'none',
+          zIndex: 2,
+          width: 82,
+          height: 82,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.5))',
+        }}
+      >
+        <img
+          src={playIcon}
+          alt="Play"
+          style={{
+            width: 82,
+            height: 82,
+            display: 'block',
+            pointerEvents: 'none',
+            userSelect: 'none',
+            WebkitTouchCallout: 'none',
+            WebkitUserSelect: 'none',
+            touchAction: 'manipulation'
+          }}
+        />
+      </div>
     </div>
   );
 }
