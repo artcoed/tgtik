@@ -31,6 +31,7 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
   const wasFirstPause = useRef(false);
   const playRequested = useRef(false);
   const [wasUserGesture, setWasUserGesture] = useState(false);
+  const [isVideoReady, setIsVideoReady] = useState(false);
 
   useEffect(() => {
     if (videoRef.current) {
@@ -147,7 +148,7 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
               }
             }}
             autoPlay={wasUserGesture ? playing : false}
-            onPointerDown={handlePlayPause}
+            onPointerDown={isVideoReady ? handlePlayPause : undefined}
             onPlay={() => setPlaying(true)}
             onPause={() => setPlaying(false)}
             onEnded={handleEnded}
@@ -155,6 +156,7 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
             onWaiting={() => setIsVideoLoading(true)}
             onCanPlay={() => {
               setIsVideoLoading(false);
+              setIsVideoReady(true);
               if (onVideoReady) onVideoReady();
               if (shouldSeekRef.current && videoRef.current) {
                 videoRef.current.currentTime = playedSeconds;
@@ -185,45 +187,47 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
               WebkitTapHighlightColor: 'transparent',
             }}
           />
-          <div
-            style={{
-              position: 'absolute',
-              left: '50%',
-              top: 'calc(50% - 84px)',
-              transform: playing ? 'translate(-50%, -50%) scale(0.7)' : 'translate(-50%, -50%) scale(1)',
-              opacity: playing ? 0 : 1,
-              transition: 'opacity 0.35s cubic-bezier(.4,0,.2,1), transform 0.35s cubic-bezier(.4,0,.2,1)',
-              pointerEvents: 'none', // overlay не ловит клики
-              zIndex: 2,
-              width: 82,
-              height: 82,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.5))',
-              WebkitTapHighlightColor: 'transparent',
-              WebkitUserSelect: 'none',
-              userSelect: 'none',
-              WebkitTouchCallout: 'none',
-              touchAction: 'manipulation',
-            }}
-          >
-            <img
-              src={playIcon}
-              alt="Play"
+          {isVideoReady && (
+            <div
               style={{
+                position: 'absolute',
+                left: '50%',
+                top: 'calc(50% - 84px)',
+                transform: playing ? 'translate(-50%, -50%) scale(0.7)' : 'translate(-50%, -50%) scale(1)',
+                opacity: playing ? 0 : 1,
+                transition: 'opacity 0.35s cubic-bezier(.4,0,.2,1), transform 0.35s cubic-bezier(.4,0,.2,1)',
+                pointerEvents: 'none', // overlay не ловит клики
+                zIndex: 2,
                 width: 82,
                 height: 82,
-                display: 'block',
-                pointerEvents: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.5))',
+                WebkitTapHighlightColor: 'transparent',
+                WebkitUserSelect: 'none',
                 userSelect: 'none',
                 WebkitTouchCallout: 'none',
-                WebkitUserSelect: 'none',
                 touchAction: 'manipulation',
-                WebkitTapHighlightColor: 'transparent',
               }}
-            />
-          </div>
+            >
+              <img
+                src={playIcon}
+                alt="Play"
+                style={{
+                  width: 82,
+                  height: 82,
+                  display: 'block',
+                  pointerEvents: 'none',
+                  userSelect: 'none',
+                  WebkitTouchCallout: 'none',
+                  WebkitUserSelect: 'none',
+                  touchAction: 'manipulation',
+                  WebkitTapHighlightColor: 'transparent',
+                }}
+              />
+            </div>
+          )}
         </>
       ) : null}
       {/* Loader is now handled by parent via isVideoLoading state */}
