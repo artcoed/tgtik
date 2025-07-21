@@ -26,7 +26,7 @@ const RegistrationBlock: React.FC<RegistrationBlockProps> = ({ onChangeAge, onCh
       return;
     }
     const num = Number(value);
-    if (num < 16 || num > 100) {
+    if (num < 18 || num > 100) {
       setAgeError(translations.specifyAge);
     } else {
       setAgeError('');

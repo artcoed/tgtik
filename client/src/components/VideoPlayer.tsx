@@ -82,26 +82,38 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
   }, [playing]);
 
   const handlePlayPause = (e: React.PointerEvent<HTMLVideoElement>) => {
+    console.log('[VideoPlayer] handlePlayPause:', {
+      userAgent: navigator.userAgent,
+      isAndroid,
+      wasUserGesture,
+      videoPaused: videoRef.current?.paused,
+      playing,
+      isVideoReady,
+      eventType: e.type
+    });
     if (!wasUserGesture) {
       if (videoRef.current) {
+        console.log('[VideoPlayer] First user gesture, trying to play video...');
         videoRef.current.play().then(() => {
           // На Android сразу считаем, что жест был, чтобы не требовать двойного нажатия
           setWasUserGesture(true);
           if (setIsFirstPlay) setIsFirstPlay(false);
-        }).catch(() => {});
+        }).catch((err) => { console.log('[VideoPlayer] play() error:', err); });
       }
       // На Android: сразу считаем, что пользовательский жест был
       if (isAndroid) {
         setWasUserGesture(true);
         if (setIsFirstPlay) setIsFirstPlay(false);
       }
+      console.log('[VideoPlayer] wasUserGesture set to true (Android workaround):', isAndroid);
       return;
     }
     if (videoRef.current) {
+      console.log('[VideoPlayer] Toggling play/pause. Current paused:', videoRef.current.paused);
       if (!videoRef.current.paused) {
         videoRef.current.pause();
       } else {
-        videoRef.current.play().catch(() => {});
+        videoRef.current.play().catch((err) => { console.log('[VideoPlayer] play() error:', err); });
       }
     }
   };
@@ -155,7 +167,10 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
               }
             }}
             autoPlay={wasUserGesture ? playing : false}
-            onPointerDown={isVideoReady ? handlePlayPause : undefined}
+            onPointerDown={e => {
+              console.log('[VideoPlayer] onPointerDown', { isVideoReady, wasUserGesture });
+              if (isVideoReady) handlePlayPause(e);
+            }}
             onPlay={() => setPlaying(true)}
             onPause={() => setPlaying(false)}
             onEnded={handleEnded}
