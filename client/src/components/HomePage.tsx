@@ -21,7 +21,7 @@ import { getUserId, getBotId, isTelegramWebApp } from '../utils/telegram';
 import { setPlayedSeconds } from '../store';
 import { resetTimer } from '../store';
 
-function HomePage({ onSelect, activeTab, setMoney, showToast, showErrorModal, setIsOpenBackgroundModal, translations, timerDelay, onVideoLimitReached }: { onSelect?: (tab: 'home' | 'bonus' | 'money') => void, activeTab?: 'home' | 'bonus' | 'money' , setMoney: (v: number) => void, showToast: (title: string, description: string) => void, showErrorModal?: (msg: string) => void, setIsOpenBackgroundModal: (value: boolean) => void, translations: any, timerDelay?: number, onVideoLimitReached?: (rate: number, maxVideos: number) => void }) {
+function HomePage({ onSelect, activeTab, setMoney, showToast, showErrorModal, setIsOpenBackgroundModal, translations, timerDelay, onVideoLimitReached }: { onSelect?: (tab: 'home' | 'bonus' | 'money') => void, activeTab?: 'home' | 'bonus' | 'money' , setMoney: (v: number) => void, showToast: (title: string, description: string) => void, showErrorModal?: (msg: string) => void, setIsOpenBackgroundModal: (value: boolean) => void, translations: any, timerDelay?: number, onVideoLimitReached?: (rate: number, maxVideos: number, onContinue: () => void) => void }) {
   const [showGiftToast, setShowGiftToast] = useState(false);
   const [showGiftWindow, setShowGiftWindow] = useState(false);
   const [isGiftOpen, setIsGiftOpen] = useState(false);
@@ -55,7 +55,7 @@ function HomePage({ onSelect, activeTab, setMoney, showToast, showErrorModal, se
   const [isVideoLimitReached, setIsVideoLimitReached] = useState(false);
   const showVideoLimitModal = () => {
     setIsVideoLimitReached(true);
-    onVideoLimitReached?.(rate + 1, maxVideos);
+    onVideoLimitReached?.(rate + 1, maxVideos, () => setIsVideoLimitReached(false));
   };
 
   useEffect(() => {
@@ -312,7 +312,7 @@ function HomePage({ onSelect, activeTab, setMoney, showToast, showErrorModal, se
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 403) {
         // Daily video limit reached
-        onVideoLimitReached?.(rate + 1, maxVideos);
+        onVideoLimitReached?.(rate + 1, maxVideos, () => setIsVideoLimitReached(false));
         return;
       }
       if (axios.isAxiosError(error) && error.response?.status === 404) {

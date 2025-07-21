@@ -22,6 +22,12 @@ import { api } from './api/api';
 import { baseUrl } from './api/api';
 import { getCloudItem, setCloudItem } from './utils/cloudStorage';
 
+declare global {
+  interface Window {
+    _videoLimitOnContinue?: (() => void) | null;
+  }
+}
+
 function BackgroundModal({ open, onClose, children }: { open: boolean, onClose: () => void, children: React.ReactNode }) {
   const [animate, setAnimate] = useState(false);
 
@@ -347,6 +353,10 @@ export default function App() {
               onContinue={() => {
                 setVideoLimitReached(false);
                 setIsOpenBackgroundModal(false);
+                if (window._videoLimitOnContinue) {
+                  window._videoLimitOnContinue();
+                  window._videoLimitOnContinue = null;
+                }
               }} 
               translations={translations}
             />
@@ -371,11 +381,13 @@ export default function App() {
           showErrorModal={undefined} 
           setIsOpenBackgroundModal={setIsOpenBackgroundModal} 
           timerDelay={timerDelay}
-          onVideoLimitReached={(rate, maxVideos) => {
+          onVideoLimitReached={(rate, maxVideos, onContinue) => {
             setVideoRate(rate);
             setVideoMaxVideos(maxVideos);
             setVideoLimitReached(true);
             setIsOpenBackgroundModal(true);
+            // Сохраняем onContinue для вызова при закрытии модалки
+            window._videoLimitOnContinue = onContinue;
           }}
         />
       </div>
