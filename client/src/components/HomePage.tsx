@@ -297,21 +297,20 @@ function HomePage({ onSelect, activeTab, setMoney, showToast, showErrorModal, se
       )}
       <VideoPlayer
         setProgress={setProgress}
-        videos={video ? [video] : []}
-        currentIndex={0}
-        setCurrentIndex={setCurrentIndex}
+        video={video}
         fade={fade}
         setIsVideoLoading={setIsVideoLoading}
         playing={playing}
         setPlaying={setPlaying}
-        muted={!playing || isFirstPlay} // mute если пауза или первый запуск
+        muted={false}
         onVideoReady={() => {
           setIsVideoReady(true);
           if (!playing) setPlaying(false);
         }}
-        playedSeconds={activeTab === 'home' ? playedSeconds : 0}
+        playedSeconds={playedSeconds}
         onProgress={handleProgress}
-        setIsFirstPlay={setIsFirstPlay} // новый проп
+        setIsFirstPlay={setIsFirstPlay}
+        isFirstPlay={isFirstPlay}
       />
       <VideoProgressBar progress={progress} />
       <VideoTopBar onGiftClick={handleGiftClick} rate={rate} maxVideos={maxVideos} onProfileClick={handleOpenProfile} translations={translations} hideGiftIcon={hasBonus}/>
