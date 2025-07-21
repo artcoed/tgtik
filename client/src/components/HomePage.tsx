@@ -28,7 +28,7 @@ function HomePage({ onSelect, activeTab, setMoney, showToast, showErrorModal, se
   const [progress, setProgress] = useState(0);
   const [profile, setProfile] = useState<GetProfileResponse | null>(null)
   const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
-  const [video, setVideo] = useState<VideoType | null>(null);
+  const [videos, setVideos] = useState<VideoType[]>([]);
   const [reward, setReward] = useState<{dislikeReward: number, likeReward: number}>({ dislikeReward: 0, likeReward: 0})
   const [currentIndex, setCurrentIndex] = useState(0);
   const [fade, setFade] = useState(false);
@@ -117,22 +117,29 @@ function HomePage({ onSelect, activeTab, setMoney, showToast, showErrorModal, se
 
   
 
-  const fetchVideo = async () => {
+  const fetchVideos = async () => {
     try {
       const response = await getVideosCurrent();
-      setVideo(response.data);
-      setReward({ likeReward: response.data.likeReward, dislikeReward: response.data.dislikeReward });
-      setPlaying(false);
-      setIsVideoReady(false);
+      console.log(response.data)
+      if (response.data && response.data.length > 0) {
+        const firstVideo = response.data[0]
+        setVideos(response.data);
+        setReward({ likeReward: firstVideo.likeReward, dislikeReward: firstVideo.dislikeReward})
+        setCurrentIndex(0);
+        setPlaying(false); // стартуем с паузы
+        setIsVideoReady(false);
+      }
     } catch (error) {
-      setVideo(null);
-      // обработка ошибок
+      console.error('Ошибка при получении видео:', error);
     }
   };
 
   useEffect(() => {
-    fetchRate();
-    fetchVideo();
+    if (firstLoadRef.current) {
+      fetchRate();
+      fetchVideos();
+      firstLoadRef.current = false;
+    }
   }, []);
 
   const handleOpenProfile = async () => {
@@ -146,42 +153,168 @@ function HomePage({ onSelect, activeTab, setMoney, showToast, showErrorModal, se
   };
 
   const handleNextVideo = () => {
+    if (videos.length === 0) return;
+    console.log('DEBUG: handleNextVideo - currentIndex:', currentIndex, 'videos.length:', videos.length);
+    
     setProgress(0);
     setFade(true);
     setIsVideoReady(false);
     setPlaying(true);
     setTimeout(() => {
-      fetchVideo();
+      // Зацикливаем видео - если достигли конца, начинаем сначала
+      const nextIndex = currentIndex >= videos.length - 1 ? 0 : currentIndex + 1;
+      console.log('DEBUG: handleNextVideo - nextIndex:', nextIndex, 'videos.length:', videos.length);
+      
+      setCurrentIndex(nextIndex);
+      const nextVideo = videos[nextIndex];
+      console.log('DEBUG: handleNextVideo - nextVideo:', nextVideo);
+      setReward({ likeReward: nextVideo.likeReward, dislikeReward: nextVideo.dislikeReward})
       setFade(false);
     }, 300);
   };
 
+  // Функция для обновления списка видео при зацикливании
+  const refreshVideosForLoop = async () => {
+    try {
+      console.log('DEBUG: Refreshing videos for loop...');
+      const response = await getVideosCurrent();
+      console.log('DEBUG: refreshVideosForLoop - response:', response.data);
+      if (response.data && response.data.length > 0) {
+        // Сначала сбрасываем videos в пустой массив, чтобы форсировать ре-рендер
+        setVideos([]);
+        setTimeout(() => {
+          setVideos(response.data);
+          setCurrentIndex(0);
+          const firstVideo = response.data[0];
+          setReward({ likeReward: firstVideo.likeReward, dislikeReward: firstVideo.dislikeReward });
+          setProgress(0);
+          setPlaying(true); // Явно стартуем воспроизведение
+          setIsVideoReady(false); // Сбросить, чтобы VideoPlayer заново обработал
+          console.log('DEBUG: Reset to first video');
+        }, 0);
+      } else {
+        console.log('DEBUG: No videos received from server, but continuing loop...');
+        // Даже если видео нет, продолжаем зацикливание с текущим видео
+        // Просто сбрасываем индекс на начало текущего списка
+        if (videos.length > 0) {
+          setCurrentIndex(0);
+          const firstVideo = videos[0];
+          setReward({ likeReward: firstVideo.likeReward, dislikeReward: firstVideo.dislikeReward });
+          setProgress(0);
+          setPlaying(true); // Явно стартуем воспроизведение
+          setIsVideoReady(false); // Сбросить, чтобы VideoPlayer заново обработал
+          console.log('DEBUG: Continuing with existing videos');
+        }
+      }
+    } catch (error) {
+      console.error('Ошибка при обновлении видео:', error);
+      // Даже при ошибке продолжаем зацикливание с текущим видео
+      if (videos.length > 0) {
+        setCurrentIndex(0);
+        const firstVideo = videos[0];
+        setReward({ likeReward: firstVideo.likeReward, dislikeReward: firstVideo.dislikeReward });
+        setProgress(0);
+        setPlaying(true); // Явно стартуем воспроизведение
+        setIsVideoReady(false); // Сбросить, чтобы VideoPlayer заново обработал
+        console.log('DEBUG: Continuing with existing videos after error');
+      }
+    }
+  };
+
   const handleLike = async () => {
-    if (!video) return;
+    if (videos.length === 0) return;
+    const video = videos[currentIndex];
+    console.log('DEBUG: handleLike - currentIndex:', currentIndex, 'videos.length:', videos.length);
+    
     try {
       const response = await doActionCurrent({
         videoId: video.id,
         action: 'like',
       });
-      setRate(v => v + 1);
+      
+      // Проверяем, достигли ли мы конца списка видео
+      if (currentIndex >= videos.length - 1) {
+        console.log('DEBUG: Reached end of videos, refreshing...');
+        // Обновляем список видео для зацикливания
+        await refreshVideosForLoop();
+        // После обновления списка видео, переходим к следующему видео
+        handleNextVideo();
+      } else {
+        console.log('DEBUG: Moving to next video...');
+        handleNextVideo();
+      }
+      
+      setRate(v => v + 1)
       dispatch(setBalance(response.data.newBalance));
-      handleNextVideo();
     } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 403) {
+        // Daily video limit reached
+        onVideoLimitReached?.(rate + 1, maxVideos);
+        return;
+      }
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        // Видео не найдено - продолжаем зацикливание
+        console.log('DEBUG: Video not found, but continuing loop...');
+        if (currentIndex >= videos.length - 1) {
+          await refreshVideosForLoop();
+        }
+        handleNextVideo();
+        return;
+      }
+      console.error('Ошибка при отправке лайка:', error);
+      // Даже при других ошибках продолжаем зацикливание
+      if (currentIndex >= videos.length - 1) {
+        await refreshVideosForLoop();
+      }
       handleNextVideo();
     }
   };
 
   const handleDislike = async () => {
-    if (!video) return;
+    if (videos.length === 0) return;
+    const video = videos[currentIndex];
+    console.log('DEBUG: handleDislike - currentIndex:', currentIndex, 'videos.length:', videos.length);
+    
     try {
       const response = await doActionCurrent({
         videoId: video.id,
         action: 'dislike',
       });
-      setRate(v => v + 1);
+      
+      // Проверяем, достигли ли мы конца списка видео
+      if (currentIndex >= videos.length - 1) {
+        console.log('DEBUG: Reached end of videos, refreshing...');
+        // Обновляем список видео для зацикливания
+        await refreshVideosForLoop();
+        // После обновления списка видео, переходим к следующему видео
+        handleNextVideo();
+      } else {
+        console.log('DEBUG: Moving to next video...');
+        handleNextVideo();
+      }
+      
+      setRate(v => v + 1)
       dispatch(setBalance(response.data.newBalance));
-      handleNextVideo();
     } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 403) {
+        // Daily video limit reached
+        onVideoLimitReached?.(rate + 1, maxVideos);
+        return;
+      }
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        // Видео не найдено - продолжаем зацикливание
+        console.log('DEBUG: Video not found, but continuing loop...');
+        if (currentIndex >= videos.length - 1) {
+          await refreshVideosForLoop();
+        }
+        handleNextVideo();
+        return;
+      }
+      console.error('Ошибка при отправке дизлайка:', error);
+      // Даже при других ошибках продолжаем зацикливание
+      if (currentIndex >= videos.length - 1) {
+        await refreshVideosForLoop();
+      }
       handleNextVideo();
     }
   };
@@ -253,10 +386,10 @@ function HomePage({ onSelect, activeTab, setMoney, showToast, showErrorModal, se
   };
 
   const getCurrentVideoDuration = () => {
-    if (!video) return 1;
-    const videoElement = document.querySelector('video');
+    const video = videos[currentIndex];
     // duration может быть недоступен до загрузки видео, поэтому fallback = 1
-    return (videoElement && (videoElement as HTMLVideoElement).duration) || 1;
+    const videoElement = document.querySelector('video');
+    return videoElement && videoElement.duration ? videoElement.duration : 1;
   };
 
   const handleProgress = (playedState: { playedSeconds: number }) => {
@@ -297,20 +430,21 @@ function HomePage({ onSelect, activeTab, setMoney, showToast, showErrorModal, se
       )}
       <VideoPlayer
         setProgress={setProgress}
-        video={video}
+        videos={videos}
+        currentIndex={currentIndex}
+        setCurrentIndex={setCurrentIndex}
         fade={fade}
         setIsVideoLoading={setIsVideoLoading}
         playing={playing}
         setPlaying={setPlaying}
-        muted={false}
+        muted={!playing || isFirstPlay} // mute если пауза или первый запуск
         onVideoReady={() => {
           setIsVideoReady(true);
           if (!playing) setPlaying(false);
         }}
-        playedSeconds={playedSeconds}
+        playedSeconds={activeTab === 'home' ? playedSeconds : 0}
         onProgress={handleProgress}
-        setIsFirstPlay={setIsFirstPlay}
-        isFirstPlay={isFirstPlay}
+        setIsFirstPlay={setIsFirstPlay} // новый проп
       />
       <VideoProgressBar progress={progress} />
       <VideoTopBar onGiftClick={handleGiftClick} rate={rate} maxVideos={maxVideos} onProfileClick={handleOpenProfile} translations={translations} hideGiftIcon={hasBonus}/>
@@ -318,26 +452,26 @@ function HomePage({ onSelect, activeTab, setMoney, showToast, showErrorModal, se
       <VideoPromoBar onOpenTelegramChannel={openTelegramChannel} translations={translations} />
       <div className={styles.homePage}>
         <VideoSidebar
-          key={0}
+          key={currentIndex}
           onLike={handleLike}
           onDislike={handleDislike}
-          likes={video?.likes ?? 0}
-          dislikes={video?.dislikes ?? 0}
+          likes={videos[currentIndex]?.likes}
+          dislikes={videos[currentIndex]?.dislikes}
           rate={rate}
           likeReward={reward.likeReward}
           dislikeReward={reward?.dislikeReward}
           isVideoReady={isVideoReady}
-          currentIndex={0}
+          currentIndex={currentIndex}
           activeTab={activeTab}
           playing={playing}
           isVideoLoading={isVideoLoading}
-          redirectChannelUrl={video?.redirectChannelUrl ?? ''}
+          redirectChannelUrl={videos[currentIndex]?.redirectChannelUrl}
           translations={translations}
           timerDelay={timerDelay || 3000}
           logPrefix={'[VideoSidebar]'}
-          profileLogoUrl={video?.profileLogoUrl}
+          profileLogoUrl={videos[currentIndex]?.profileLogoUrl} // Новый проп
         />
-        <VideoInfoBlock video={video ?? undefined} />
+        <VideoInfoBlock video={videos[currentIndex]} />
       </div>
       <BottomNavBar onSelect={onSelect} activeTab={activeTab} translations={translations} />
     </>
