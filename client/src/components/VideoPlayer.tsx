@@ -98,6 +98,10 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
   };
 
   const handleEnded = () => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0;
+      videoRef.current.play().catch(() => {});
+    }
     setProgress(0);
     if (setProgressNoTransition) {
       setProgressNoTransition(true);
