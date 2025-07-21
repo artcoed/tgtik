@@ -70,7 +70,7 @@ export const WithdrawalForm: React.FC<WithdrawFormProps> = ({ onClose, minWithdr
                 </div>
             </div>
             <div className={styles.instruction}>{translations.pleaseIndicateCard}</div>
-            <div className={styles.option}>
+            <div className={styles.option + (showErrors && card && !isCardValid ? ' ' + styles.optionError : '')}>
             <div className={styles.optionContent}>
                 <div className={styles.optionLabel}>{translations.card}</div>
                 <div className={styles.separator} />
@@ -85,7 +85,7 @@ export const WithdrawalForm: React.FC<WithdrawFormProps> = ({ onClose, minWithdr
                 </div>
             </div>
             <div className={styles.instruction}>{translations.orUseIban}</div>
-            <div className={styles.option}>
+            <div className={styles.option + (showErrors && iban && !isIbanValid ? ' ' + styles.optionError : '')}>
             <div className={styles.optionContent}>
                 <div className={styles.optionLabel}>{translations.iban}</div>
                 <div className={styles.separator} />
@@ -100,7 +100,7 @@ export const WithdrawalForm: React.FC<WithdrawFormProps> = ({ onClose, minWithdr
                 </div>
             </div>
             <div className={styles.instruction}>{translations.amountToWithdraw}</div>
-            <div className={styles.option}>
+            <div className={styles.option + (showErrors && !isAmountValid ? ' ' + styles.optionError : '')}>
             <div className={styles.optionContent}>
                 <div className={styles.optionLabel}>{translations.amount}</div>
                 <div className={styles.separator} />

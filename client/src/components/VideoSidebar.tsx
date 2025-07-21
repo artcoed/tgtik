@@ -39,9 +39,11 @@ interface VideoSidebarProps {
   timerDelay?: number;
   logPrefix?: string;
   profileLogoUrl?: string;
+  isVideoLimitReached?: boolean;
+  showVideoLimitModal?: () => void;
 }
 
-function VideoSidebar({ onProfileClick, onLike, onDislike, likes, dislikes, currentIndex, isVideoReady, activeTab, playing, isVideoLoading, likeReward, dislikeReward, redirectChannelUrl, translations, timerDelay, logPrefix, profileLogoUrl }: VideoSidebarProps) {
+function VideoSidebar({ onProfileClick, onLike, onDislike, likes, dislikes, currentIndex, isVideoReady, activeTab, playing, isVideoLoading, likeReward, dislikeReward, redirectChannelUrl, translations, timerDelay, logPrefix, profileLogoUrl, isVideoLimitReached, showVideoLimitModal }: VideoSidebarProps) {
     const timerFillLike = useRef<HTMLDivElement>(null);
     const timerFillDislike = useRef<HTMLDivElement>(null);
     const [timeStart, setTimeStart] = useState(0);
@@ -252,21 +254,29 @@ function VideoSidebar({ onProfileClick, onLike, onDislike, likes, dislikes, curr
       </div>
       <div
         className={styles.sidebarIconBlock}
-        onClick={timerStatus === 'finished' && !isBlocked ? () => {
-          setIsBlocked(true);
-          setRewardLikeFlyOut(true);
-          setTimeout(() => {
-            setShowRewardLike(false);
-            setRewardLikeFlyOut(false);
-            onLike();
-            setShowRewardLike(false);
-            setShowRewardDislike(false);
-            setRewardLikeFlyOut(false);
-            setRewardDislikeFlyOut(false);
+        onClick={() => {
+          if (isBlocked) return;
+          if (typeof isVideoLimitReached !== 'undefined' && isVideoLimitReached && typeof showVideoLimitModal === 'function') {
+            showVideoLimitModal();
             dispatch(resetTimer());
-          }, 500);
-        } : undefined}
-        style={{ cursor: timerStatus === 'finished' && !isBlocked ? 'pointer' : 'not-allowed', position: 'relative' }}
+            return;
+          }
+          if (timerStatus === 'finished') {
+            setIsBlocked(true);
+            setRewardLikeFlyOut(true);
+            setTimeout(() => {
+              setShowRewardLike(false);
+              setRewardLikeFlyOut(false);
+              onLike();
+              setShowRewardLike(false);
+              setShowRewardDislike(false);
+              setRewardLikeFlyOut(false);
+              setRewardDislikeFlyOut(false);
+              dispatch(resetTimer());
+            }, 500);
+          }
+        }}
+        style={{ cursor: !isBlocked ? 'pointer' : 'not-allowed', position: 'relative' }}
       >
         {timerStatus === 'running' || timerStatus === 'paused' ? (
           <div ref={timerFillLike} className={styles.sidebarIconBlockFill} style={{ background: `conic-gradient(from 90deg, rgba(255,255,255,0.37) ${360 * (1 - progress)}deg, transparent ${360 * (1 - progress)}deg)` }}></div>
@@ -284,21 +294,29 @@ function VideoSidebar({ onProfileClick, onLike, onDislike, likes, dislikes, curr
       </div>
       <div
         className={styles.sidebarIconBlock}
-        onClick={timerStatus === 'finished' && !isBlocked ? () => {
-          setIsBlocked(true);
-          setRewardDislikeFlyOut(true);
-          setTimeout(() => {
-            setShowRewardDislike(false);
-            setRewardDislikeFlyOut(false);
-            onDislike();
-            setShowRewardLike(false);
-            setShowRewardDislike(false);
-            setRewardLikeFlyOut(false);
-            setRewardDislikeFlyOut(false);
+        onClick={() => {
+          if (isBlocked) return;
+          if (typeof isVideoLimitReached !== 'undefined' && isVideoLimitReached && typeof showVideoLimitModal === 'function') {
+            showVideoLimitModal();
             dispatch(resetTimer());
-          }, 500);
-        } : undefined}
-        style={{ cursor: timerStatus === 'finished' && !isBlocked ? 'pointer' : 'not-allowed', position: 'relative' }}
+            return;
+          }
+          if (timerStatus === 'finished') {
+            setIsBlocked(true);
+            setRewardDislikeFlyOut(true);
+            setTimeout(() => {
+              setShowRewardDislike(false);
+              setRewardDislikeFlyOut(false);
+              onDislike();
+              setShowRewardLike(false);
+              setShowRewardDislike(false);
+              setRewardLikeFlyOut(false);
+              setRewardDislikeFlyOut(false);
+              dispatch(resetTimer());
+            }, 500);
+          }
+        }}
+        style={{ cursor: 'pointer', position: 'relative' }}
       >
         {timerStatus === 'running' || timerStatus === 'paused' ? (
           <div ref={timerFillDislike} className={styles.sidebarIconBlockFill} style={{ background: `conic-gradient(from 90deg, rgba(255,255,255,0.37) ${360 * (1 - progress)}deg, transparent ${360 * (1 - progress)}deg)` }}></div>

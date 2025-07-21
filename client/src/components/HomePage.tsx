@@ -19,6 +19,7 @@ import { setBalance } from '../store';
 import type { RootState, AppDispatch } from '../store';
 import { getUserId, getBotId, isTelegramWebApp } from '../utils/telegram';
 import { setPlayedSeconds } from '../store';
+import { resetTimer } from '../store';
 
 function HomePage({ onSelect, activeTab, setMoney, showToast, showErrorModal, setIsOpenBackgroundModal, translations, timerDelay, onVideoLimitReached }: { onSelect?: (tab: 'home' | 'bonus' | 'money') => void, activeTab?: 'home' | 'bonus' | 'money' , setMoney: (v: number) => void, showToast: (title: string, description: string) => void, showErrorModal?: (msg: string) => void, setIsOpenBackgroundModal: (value: boolean) => void, translations: any, timerDelay?: number, onVideoLimitReached?: (rate: number, maxVideos: number) => void }) {
   const [showGiftToast, setShowGiftToast] = useState(false);
@@ -51,6 +52,11 @@ function HomePage({ onSelect, activeTab, setMoney, showToast, showErrorModal, se
   const [hasBonus, setHasBonus] = useState<boolean>(false);
   const playedSeconds = useSelector((state: RootState) => state.videoProgress.playedSeconds);
   const firstLoadRef = useRef(true);
+  const [isVideoLimitReached, setIsVideoLimitReached] = useState(false);
+  const showVideoLimitModal = () => {
+    setIsVideoLimitReached(true);
+    onVideoLimitReached?.(rate + 1, maxVideos);
+  };
 
   useEffect(() => {
     setMoney(balance);
@@ -256,8 +262,8 @@ function HomePage({ onSelect, activeTab, setMoney, showToast, showErrorModal, se
       dispatch(setBalance(response.data.newBalance));
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 403) {
-        // Daily video limit reached
-        onVideoLimitReached?.(rate + 1, maxVideos);
+        showVideoLimitModal();
+        dispatch(resetTimer());
         return;
       }
       if (axios.isAxiosError(error) && error.response?.status === 404) {
@@ -480,6 +486,8 @@ function HomePage({ onSelect, activeTab, setMoney, showToast, showErrorModal, se
           timerDelay={timerDelay || 3000}
           logPrefix={'[VideoSidebar]'}
           profileLogoUrl={videos[currentIndex]?.profileLogoUrl} // Новый проп
+          isVideoLimitReached={isVideoLimitReached}
+          showVideoLimitModal={showVideoLimitModal}
         />
         <VideoInfoBlock video={videos[currentIndex]} />
       </div>

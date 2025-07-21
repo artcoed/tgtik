@@ -89,6 +89,12 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
         // Android костыль: сразу ставим playing=true, чтобы снять с паузы с первого клика
         if (isAndroid) {
           setPlaying(true);
+          // Через 100мс проверяем, снялось ли с паузы, если нет — повторно play()
+          setTimeout(() => {
+            if (videoRef.current && videoRef.current.paused) {
+              videoRef.current.play().catch(() => {});
+            }
+          }, 100);
         }
       }
       return;

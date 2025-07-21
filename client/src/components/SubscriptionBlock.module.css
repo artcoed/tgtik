@@ -364,6 +364,12 @@
   color: #fff;
 }
 
+.optionError {
+  border: 2px solid #FF2B54;
+  box-shadow: 0 0 8px rgba(255, 43, 84, 0.2);
+  background: #191919;
+}
+
 .button:disabled {
   background: #222;
   color: #888;
