@@ -5,7 +5,7 @@ import { getTelegramData, getBotId, getUserId, getCountry, isTelegramWebApp } fr
 import { store } from '../store';
 import { getCloudItem } from '../utils/cloudStorage';
 
-const baseUrl = process.env.NODE_ENV === 'production' ? '/' : 'http://localhost/'
+const baseUrl = 'http://localhost/'
 
 const api = axios.create({
     withCredentials: true,
