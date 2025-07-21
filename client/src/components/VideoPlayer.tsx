@@ -77,15 +77,22 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
     }
   }, [playing]);
 
-  const handlePlayPause = () => {
+  const handlePlayPause = (e: React.PointerEvent<HTMLVideoElement>) => {
     if (!wasUserGesture) {
-      setWasUserGesture(true);
       if (videoRef.current) {
         videoRef.current.play().catch(() => {});
+        setWasUserGesture(true);
         setPlaying(true);
         if (setIsFirstPlay) setIsFirstPlay(false);
       }
       return;
+    }
+    if (videoRef.current) {
+      if (playing) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play().catch(() => {});
+      }
     }
     setPlaying((prev) => !prev);
   };
@@ -126,8 +133,7 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
               }
             }}
             autoPlay={wasUserGesture ? playing : false}
-            onClick={handlePlayPause}
-            onTouchStart={handlePlayPause}
+            onPointerDown={handlePlayPause}
             onEnded={() => {
               if (videoRef.current) {
                 videoRef.current.currentTime = 0;
