@@ -33,6 +33,7 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
   const [wasUserGesture, setWasUserGesture] = useState(false);
   const isAndroid = /android/i.test(navigator.userAgent);
   const [isVideoReady, setIsVideoReady] = useState(false);
+  const [showOverlay, setShowOverlay] = useState(true);
 
   useEffect(() => {
     if (videoRef.current) {
@@ -91,25 +92,17 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
       isVideoReady,
       eventType: e.type
     });
-    if (!wasUserGesture) {
+    if (showOverlay) {
       if (videoRef.current) {
-        console.log('[VideoPlayer] First user gesture, trying to play video...');
         videoRef.current.play().then(() => {
-          // На Android сразу считаем, что жест был, чтобы не требовать двойного нажатия
           setWasUserGesture(true);
+          setShowOverlay(false);
           if (setIsFirstPlay) setIsFirstPlay(false);
         }).catch((err) => { console.log('[VideoPlayer] play() error:', err); });
       }
-      // На Android: сразу считаем, что пользовательский жест был
-      if (isAndroid) {
-        setWasUserGesture(true);
-        if (setIsFirstPlay) setIsFirstPlay(false);
-      }
-      console.log('[VideoPlayer] wasUserGesture set to true (Android workaround):', isAndroid);
       return;
     }
     if (videoRef.current) {
-      console.log('[VideoPlayer] Toggling play/pause. Current paused:', videoRef.current.paused);
       if (!videoRef.current.paused) {
         videoRef.current.pause();
       } else {
@@ -166,7 +159,7 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
                 }
               }
             }}
-            autoPlay={wasUserGesture ? playing : false}
+            autoPlay={false}
             onPointerDown={e => {
               console.log('[VideoPlayer] onPointerDown', { isVideoReady, wasUserGesture });
               if (isVideoReady) handlePlayPause(e);
@@ -184,9 +177,6 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
                 videoRef.current.currentTime = playedSeconds;
                 lastSeekRef.current = playedSeconds;
                 shouldSeekRef.current = false;
-              }
-              if (playing && videoRef.current && videoRef.current.paused) {
-                videoRef.current.play().catch(() => {});
               }
               // Если пользователь кликнул play до готовности видео, включаем проигрывание сейчас
               if (playRequested.current) {
@@ -209,6 +199,38 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
               WebkitTapHighlightColor: 'transparent',
             }}
           />
+          {showOverlay && isVideoReady && (
+            <div
+              style={{
+                position: 'absolute',
+                left: '50%',
+                top: '50%',
+                transform: 'translate(-50%, -50%)',
+                zIndex: 10,
+                background: 'rgba(0,0,0,0.4)',
+                borderRadius: 50,
+                padding: 24,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+              onPointerDown={e => {
+                // Проксируем pointerdown с overlay на video
+                if (videoRef.current) {
+                  // Создаем искусственный PointerEvent для video
+                  const fakeEvent = {
+                    ...e,
+                    currentTarget: videoRef.current,
+                    target: videoRef.current
+                  } as unknown as React.PointerEvent<HTMLVideoElement>;
+                  handlePlayPause(fakeEvent);
+                }
+              }}
+            >
+              <img src={playIcon} alt="Play" style={{ width: 64, height: 64 }} />
+            </div>
+          )}
           {isVideoReady && (
             <div
               style={{
