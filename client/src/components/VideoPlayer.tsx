@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Video as VideoType } from '../api/types';
 import Loader from './Loader';
 import playIcon from '../assets/playIcon2.svg';
@@ -28,6 +28,7 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
   const shouldSeekRef = useRef(false);
   const wasFirstPause = useRef(false);
   const playRequested = useRef(false);
+  const [wasUserGesture, setWasUserGesture] = useState(false);
 
   useEffect(() => {
     if (videoRef.current) {
@@ -77,24 +78,16 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
   }, [playing]);
 
   const handlePlayPause = () => {
-    if (videoRef.current) {
-      if (playing) {
-        videoRef.current.pause();
-        setPlaying(false);
-      } else {
-        if (videoRef.current.readyState >= 3) {
-          videoRef.current.play().catch((err) => {
-            if (err.name !== 'AbortError') {
-              console.error('Video play error:', err);
-            }
-          });
-          setPlaying(true);
-          if (setIsFirstPlay) setIsFirstPlay(false);
-        } else {
-          playRequested.current = true;
-        }
+    if (!wasUserGesture) {
+      setWasUserGesture(true);
+      if (videoRef.current) {
+        videoRef.current.play().catch(() => {});
+        setPlaying(true);
+        if (setIsFirstPlay) setIsFirstPlay(false);
       }
+      return;
     }
+    setPlaying((prev) => !prev);
   };
 
   return (
@@ -132,7 +125,7 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
                 }
               }
             }}
-            autoPlay={playing}
+            autoPlay={wasUserGesture ? playing : false}
             onClick={handlePlayPause}
             onTouchStart={handlePlayPause}
             onEnded={() => {
