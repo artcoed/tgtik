@@ -76,6 +76,27 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
     }
   }, [playing]);
 
+  const handlePlayPause = () => {
+    if (videoRef.current) {
+      if (playing) {
+        videoRef.current.pause();
+        setPlaying(false);
+      } else {
+        if (videoRef.current.readyState >= 3) {
+          videoRef.current.play().catch((err) => {
+            if (err.name !== 'AbortError') {
+              console.error('Video play error:', err);
+            }
+          });
+          setPlaying(true);
+          if (setIsFirstPlay) setIsFirstPlay(false);
+        } else {
+          playRequested.current = true;
+        }
+      }
+    }
+  };
+
   return (
     <div style={{
       transition: 'opacity 0.3s',
@@ -112,26 +133,8 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
               }
             }}
             autoPlay={playing}
-            onClick={() => {
-              if (videoRef.current) {
-                if (playing) {
-                  videoRef.current.pause();
-                  setPlaying(false);
-                } else {
-                  if (videoRef.current.readyState >= 3) {
-                    videoRef.current.play().catch((err) => {
-                      if (err.name !== 'AbortError') {
-                        console.error('Video play error:', err);
-                      }
-                    });
-                    setPlaying(true);
-                    if (setIsFirstPlay) setIsFirstPlay(false);
-                  } else {
-                    playRequested.current = true;
-                  }
-                }
-              }
-            }}
+            onClick={handlePlayPause}
+            onTouchStart={handlePlayPause}
             onEnded={() => {
               if (videoRef.current) {
                 videoRef.current.currentTime = 0;
