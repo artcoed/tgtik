@@ -33,7 +33,8 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
   const [wasUserGesture, setWasUserGesture] = useState(false);
   const isAndroid = /android/i.test(navigator.userAgent);
   const [isVideoReady, setIsVideoReady] = useState(false);
-  const [showOverlay, setShowOverlay] = useState(true);
+  // Overlay показывается всегда, когда видео на паузе и готово
+  const showOverlay = !playing && isVideoReady;
 
   useEffect(() => {
     if (videoRef.current) {
@@ -92,11 +93,10 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
       isVideoReady,
       eventType: e.type
     });
-    if (showOverlay) {
+    if (!wasUserGesture) {
       if (videoRef.current) {
         videoRef.current.play().then(() => {
           setWasUserGesture(true);
-          setShowOverlay(false);
           if (setIsFirstPlay) setIsFirstPlay(false);
         }).catch((err) => { console.log('[VideoPlayer] play() error:', err); });
       }
@@ -199,7 +199,7 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
               WebkitTapHighlightColor: 'transparent',
             }}
           />
-          {showOverlay && isVideoReady && (
+          {showOverlay && (
             <div
               style={{
                 position: 'absolute',
@@ -207,18 +207,20 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
                 top: '50%',
                 transform: 'translate(-50%, -50%)',
                 zIndex: 10,
-                background: 'rgba(0,0,0,0.4)',
-                borderRadius: 50,
-                padding: 24,
+                background: 'rgba(0,0,0,0.0)', // убираем черный фон
+                borderRadius: 60,
+                width: 120,
+                height: 120,
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                pointerEvents: 'auto',
+                // Можно добавить легкую тень для видимости
+                boxShadow: '0 2px 16px rgba(0,0,0,0.15)'
               }}
               onPointerDown={e => {
-                // Проксируем pointerdown с overlay на video
                 if (videoRef.current) {
-                  // Создаем искусственный PointerEvent для video
                   const fakeEvent = {
                     ...e,
                     currentTarget: videoRef.current,
@@ -228,7 +230,7 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
                 }
               }}
             >
-              <img src={playIcon} alt="Play" style={{ width: 64, height: 64 }} />
+              <img src={playIcon} alt="Play" style={{ width: 80, height: 80, opacity: 0.92 }} />
             </div>
           )}
         </>
