@@ -453,6 +453,8 @@ function HomePage({ onSelect, activeTab, setMoney, showToast, showErrorModal, se
         playedSeconds={activeTab === 'home' ? playedSeconds : 0}
         onProgress={handleProgress}
         setIsFirstPlay={setIsFirstPlay} // новый проп
+        isFirstPlay={isFirstPlay}
+        setProgressNoTransition={setProgressNoTransition}
       />
       <VideoProgressBar progress={progress} disableTransition={progressNoTransition} />
       <VideoTopBar onGiftClick={handleGiftClick} rate={rate} maxVideos={maxVideos} onProfileClick={handleOpenProfile} translations={translations} hideGiftIcon={hasBonus}/>

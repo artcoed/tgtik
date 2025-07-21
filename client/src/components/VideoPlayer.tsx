@@ -20,15 +20,18 @@ interface VideoPlayerProps {
   onProgress?: (state: { playedSeconds: number }) => void;
   setIsFirstPlay?: React.Dispatch<React.SetStateAction<boolean>>;
   isFirstPlay?: boolean;
+  setProgressNoTransition?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export default function VideoPlayer({ setProgress, videos, currentIndex, setCurrentIndex, fade, setIsVideoLoading, playing, setPlaying, muted = false, onVideoReady, playedSeconds = 0, onProgress, setIsFirstPlay, isFirstPlay }: VideoPlayerProps) {
+export default function VideoPlayer({ setProgress, videos, currentIndex, setCurrentIndex, fade, setIsVideoLoading, playing, setPlaying, muted = false, onVideoReady, playedSeconds = 0, onProgress, setIsFirstPlay, isFirstPlay, setProgressNoTransition }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const lastSeekRef = useRef<number>(-1);
   const shouldSeekRef = useRef(false);
   const wasFirstPause = useRef(false);
   const playRequested = useRef(false);
   const [wasUserGesture, setWasUserGesture] = useState(false);
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && typeof window !== 'undefined' && !('MSStream' in window);
+  const isAndroid = /android/i.test(navigator.userAgent);
 
   useEffect(() => {
     if (videoRef.current) {
@@ -82,8 +85,11 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
       if (videoRef.current) {
         videoRef.current.play().catch(() => {});
         setWasUserGesture(true);
-        setPlaying(true);
-        if (setIsFirstPlay) setIsFirstPlay(false);
+        if (isIOS) {
+          setPlaying(true);
+          if (setIsFirstPlay) setIsFirstPlay(false);
+        }
+        // На Android не трогаем setPlaying при первом gesture
       }
       return;
     }
@@ -142,6 +148,11 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
                     console.error('Video play error:', err);
                   }
                 });
+                setProgress(0);
+                if (setProgressNoTransition) {
+                  setProgressNoTransition(true);
+                  setTimeout(() => setProgressNoTransition(false), 60);
+                }
               }
             }}
             onLoadStart={() => setIsVideoLoading(true)}
