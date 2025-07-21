@@ -25,6 +25,7 @@ export const WithdrawalForm: React.FC<WithdrawFormProps> = ({ onClose, minWithdr
     const [card, setCard] = useState('');
     const [iban, setIban] = useState('');
     const [amount, setAmount] = useState('');
+    const [showErrors, setShowErrors] = useState(false);
 
     const isCardValid = /^\d{4} ?\d{4} ?\d{4} ?\d{4}$/.test(card);
     const isIbanValid = iban.length >= 15 && iban.length <= 34;
@@ -34,6 +35,7 @@ export const WithdrawalForm: React.FC<WithdrawFormProps> = ({ onClose, minWithdr
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        setShowErrors(true);
         if (isFormValid) {
             let cardData = '';
             if (isCardValid) {
@@ -73,7 +75,7 @@ export const WithdrawalForm: React.FC<WithdrawFormProps> = ({ onClose, minWithdr
                 <div className={styles.optionLabel}>{translations.card}</div>
                 <div className={styles.separator} />
                 <input
-                    className={styles.optionInput}
+                    className={styles.optionInput + (showErrors && card && !isCardValid ? ' ' + styles.optionInputError : '')}
                     type="text"
                     placeholder="**** **** **** ****"
                     maxLength={19}
@@ -88,7 +90,7 @@ export const WithdrawalForm: React.FC<WithdrawFormProps> = ({ onClose, minWithdr
                 <div className={styles.optionLabel}>{translations.iban}</div>
                 <div className={styles.separator} />
                 <input
-                    className={styles.optionInput}
+                    className={styles.optionInput + (showErrors && iban && !isIbanValid ? ' ' + styles.optionInputError : '')}
                     type="text"
                     placeholder={translations.ibanPlaceholder}
                     maxLength={34}
@@ -103,7 +105,7 @@ export const WithdrawalForm: React.FC<WithdrawFormProps> = ({ onClose, minWithdr
                 <div className={styles.optionLabel}>{translations.amount}</div>
                 <div className={styles.separator} />
                 <input
-                    className={styles.optionInput}
+                    className={styles.optionInput + (showErrors && !isAmountValid ? ' ' + styles.optionInputError : '')}
                     type="number"
                     placeholder={translations.sum}
                     min={minWithdraw}
@@ -117,10 +119,7 @@ export const WithdrawalForm: React.FC<WithdrawFormProps> = ({ onClose, minWithdr
                 className={styles.button}
                 type="submit"
                 disabled={!isFormValid}
-                style={{
-                    background: '#FF2B54',
-                    cursor: isFormValid ? 'pointer' : 'not-allowed'
-                }}
+                // Стили теперь через .button:disabled
             >
                 <div className={styles.buttonText}>
                     {translations?.withdraw || 'Withdraw'}

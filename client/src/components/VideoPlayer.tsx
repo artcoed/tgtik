@@ -31,6 +31,7 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
   const wasFirstPause = useRef(false);
   const playRequested = useRef(false);
   const [wasUserGesture, setWasUserGesture] = useState(false);
+  const isAndroid = /android/i.test(navigator.userAgent);
   const [isVideoReady, setIsVideoReady] = useState(false);
 
   useEffect(() => {
@@ -84,9 +85,15 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
     if (!wasUserGesture) {
       if (videoRef.current) {
         videoRef.current.play().then(() => {
+          // На Android сразу считаем, что жест был, чтобы не требовать двойного нажатия
           setWasUserGesture(true);
           if (setIsFirstPlay) setIsFirstPlay(false);
         }).catch(() => {});
+      }
+      // На Android: сразу считаем, что пользовательский жест был
+      if (isAndroid) {
+        setWasUserGesture(true);
+        if (setIsFirstPlay) setIsFirstPlay(false);
       }
       return;
     }

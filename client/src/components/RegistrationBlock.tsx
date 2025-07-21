@@ -77,7 +77,7 @@ const RegistrationBlock: React.FC<RegistrationBlockProps> = ({ onChangeAge, onCh
                 placeholder={translations.ageRange}
                 value={age}
                 onChange={handleAgeChange}
-                min={16}
+                min={18}
                 max={100}
                 maxLength={3}
             />
