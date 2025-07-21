@@ -89,13 +89,12 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
       return;
     }
     if (videoRef.current) {
-      if (playing) {
+      if (!videoRef.current.paused) {
         videoRef.current.pause();
       } else {
         videoRef.current.play().catch(() => {});
       }
     }
-    setPlaying((prev) => !prev);
   };
 
   const handleEnded = () => {
@@ -144,6 +143,8 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
             }}
             autoPlay={wasUserGesture ? playing : false}
             onPointerDown={handlePlayPause}
+            onPlay={() => setPlaying(true)}
+            onPause={() => setPlaying(false)}
             onEnded={handleEnded}
             onLoadStart={() => setIsVideoLoading(true)}
             onWaiting={() => setIsVideoLoading(true)}
