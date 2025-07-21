@@ -200,38 +200,21 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
             }}
           />
           {showOverlay && (
-            <div
+            <img
+              src={playIcon}
+              alt="Play"
               style={{
                 position: 'absolute',
                 left: '50%',
                 top: '50%',
                 transform: 'translate(-50%, -50%)',
-                zIndex: 10,
-                background: 'rgba(0,0,0,0.0)', // убираем черный фон
-                borderRadius: 60,
                 width: 120,
                 height: 120,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                pointerEvents: 'auto',
-                // Можно добавить легкую тень для видимости
-                boxShadow: '0 2px 16px rgba(0,0,0,0.15)'
+                opacity: 0.92,
+                pointerEvents: 'none', // Клик всегда идет на <video>
+                zIndex: 10
               }}
-              onPointerDown={e => {
-                if (videoRef.current) {
-                  const fakeEvent = {
-                    ...e,
-                    currentTarget: videoRef.current,
-                    target: videoRef.current
-                  } as unknown as React.PointerEvent<HTMLVideoElement>;
-                  handlePlayPause(fakeEvent);
-                }
-              }}
-            >
-              <img src={playIcon} alt="Play" style={{ width: 80, height: 80, opacity: 0.92 }} />
-            </div>
+            />
           )}
         </>
       ) : null}
