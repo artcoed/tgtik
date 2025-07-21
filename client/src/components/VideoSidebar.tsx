@@ -160,6 +160,11 @@ function VideoSidebar({ onProfileClick, onLike, onDislike, likes, dislikes, curr
       }
     }, []);
 
+    useEffect(() => {
+      if (isVideoLimitReached === false) {
+        setIsBlocked(false);
+      }
+    }, [isVideoLimitReached]);
 
 
     const handleCopyInvite = async () => {

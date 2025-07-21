@@ -81,7 +81,11 @@ export const WithdrawalForm: React.FC<WithdrawFormProps> = ({ onClose, minWithdr
                     maxLength={19}
                     value={card}
                     onChange={handleCardChange}
+                    onBlur={() => setShowErrors(true)}
                 />
+                {showErrors && card && !isCardValid && (
+                  <div className={styles.errorText}>{translations.cardError || 'Введите корректный номер карты (16 цифр)'}</div>
+                )}
                 </div>
             </div>
             <div className={styles.instruction}>{translations.orUseIban}</div>
@@ -96,7 +100,11 @@ export const WithdrawalForm: React.FC<WithdrawFormProps> = ({ onClose, minWithdr
                     maxLength={34}
                     value={iban}
                     onChange={e => setIban(e.target.value)}
+                    onBlur={() => setShowErrors(true)}
                 />
+                {showErrors && iban && !isIbanValid && (
+                  <div className={styles.errorText}>{translations.ibanError || 'Введите корректный IBAN (15-34 символа)'}</div>
+                )}
                 </div>
             </div>
             <div className={styles.instruction}>{translations.amountToWithdraw}</div>
@@ -112,7 +120,11 @@ export const WithdrawalForm: React.FC<WithdrawFormProps> = ({ onClose, minWithdr
                     max={1000}
                     value={amount}
                     onChange={e => setAmount(e.target.value)}
+                    onBlur={() => setShowErrors(true)}
                 />
+                {showErrors && !isAmountValid && (
+                  <div className={styles.errorText}>{translations.amountError || `Введите сумму от ${minWithdraw} до 1000`}</div>
+                )}
                 </div>
             </div>
             <button

@@ -375,3 +375,11 @@
   color: #888;
   cursor: not-allowed;
 }
+
+.errorText {
+  color: #FF2B54;
+  font-size: 12px;
+  margin-top: 4px;
+  margin-left: 2px;
+  text-align: left;
+}
