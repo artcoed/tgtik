@@ -88,7 +88,8 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
       WebkitTouchCallout: 'none',
       WebkitUserSelect: 'none',
       userSelect: 'none',
-      touchAction: 'manipulation'
+      touchAction: 'manipulation',
+      WebkitTapHighlightColor: 'transparent',
     }}>
       {videos[currentIndex]?.url ? (
         <>
@@ -171,7 +172,8 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
               WebkitTouchCallout: 'none',
               WebkitUserSelect: 'none',
               userSelect: 'none',
-              touchAction: 'manipulation'
+              touchAction: 'manipulation',
+              WebkitTapHighlightColor: 'transparent',
             }}
           />
           <div
@@ -182,7 +184,7 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
               transform: playing ? 'translate(-50%, -50%) scale(0.7)' : 'translate(-50%, -50%) scale(1)',
               opacity: playing ? 0 : 1,
               transition: 'opacity 0.35s cubic-bezier(.4,0,.2,1), transform 0.35s cubic-bezier(.4,0,.2,1)',
-              pointerEvents: 'none',
+              pointerEvents: 'none', // overlay не ловит клики
               zIndex: 2,
               width: 82,
               height: 82,
@@ -190,21 +192,27 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
               alignItems: 'center',
               justifyContent: 'center',
               filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.5))',
+              WebkitTapHighlightColor: 'transparent',
+              WebkitUserSelect: 'none',
+              userSelect: 'none',
+              WebkitTouchCallout: 'none',
+              touchAction: 'manipulation',
             }}
           >
             <img
               src={playIcon}
               alt="Play"
-                          style={{
-              width: 82,
-              height: 82,
-              display: 'block',
-              pointerEvents: 'none',
-              userSelect: 'none',
-              WebkitTouchCallout: 'none',
-              WebkitUserSelect: 'none',
-              touchAction: 'manipulation'
-            }}
+              style={{
+                width: 82,
+                height: 82,
+                display: 'block',
+                pointerEvents: 'none',
+                userSelect: 'none',
+                WebkitTouchCallout: 'none',
+                WebkitUserSelect: 'none',
+                touchAction: 'manipulation',
+                WebkitTapHighlightColor: 'transparent',
+              }}
             />
           </div>
         </>

@@ -26,6 +26,7 @@ function HomePage({ onSelect, activeTab, setMoney, showToast, showErrorModal, se
   const [isGiftOpen, setIsGiftOpen] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [progressNoTransition, setProgressNoTransition] = useState(false);
   const [profile, setProfile] = useState<GetProfileResponse | null>(null)
   const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
   const [videos, setVideos] = useState<VideoType[]>([]);
@@ -73,6 +74,13 @@ function HomePage({ onSelect, activeTab, setMoney, showToast, showErrorModal, se
       setPlaying(true);
     }
   }, [activeTab]);
+
+  useEffect(() => {
+    setProgressNoTransition(true);
+    setProgress(0);
+    const timeout = setTimeout(() => setProgressNoTransition(false), 60);
+    return () => clearTimeout(timeout);
+  }, [currentIndex]);
 
   // Fetch hasBonus on mount
   useEffect(() => {
@@ -446,7 +454,7 @@ function HomePage({ onSelect, activeTab, setMoney, showToast, showErrorModal, se
         onProgress={handleProgress}
         setIsFirstPlay={setIsFirstPlay} // новый проп
       />
-      <VideoProgressBar progress={progress} />
+      <VideoProgressBar progress={progress} disableTransition={progressNoTransition} />
       <VideoTopBar onGiftClick={handleGiftClick} rate={rate} maxVideos={maxVideos} onProfileClick={handleOpenProfile} translations={translations} hideGiftIcon={hasBonus}/>
       <VideoBalanceBar translations={translations} />
       <VideoPromoBar onOpenTelegramChannel={openTelegramChannel} translations={translations} />
