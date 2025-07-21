@@ -31,10 +31,6 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
   const wasFirstPause = useRef(false);
   const playRequested = useRef(false);
   const [wasUserGesture, setWasUserGesture] = useState(false);
-  const isAndroid = /android/i.test(navigator.userAgent);
-  const [isVideoReady, setIsVideoReady] = useState(false);
-  // Overlay показывается всегда, когда видео на паузе и готово
-  const showOverlay = !playing && isVideoReady;
 
   useEffect(() => {
     if (videoRef.current) {
@@ -84,21 +80,16 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
   }, [playing]);
 
   const handlePlayPause = (e: React.PointerEvent<HTMLVideoElement>) => {
-    console.log('[VideoPlayer] handlePlayPause:', {
-      userAgent: navigator.userAgent,
-      isAndroid,
-      wasUserGesture,
-      videoPaused: videoRef.current?.paused,
-      playing,
-      isVideoReady,
-      eventType: e.type
-    });
+    const isAndroid = /Android/i.test(navigator.userAgent);
     if (!wasUserGesture) {
       if (videoRef.current) {
-        videoRef.current.play().then(() => {
-          setWasUserGesture(true);
-          if (setIsFirstPlay) setIsFirstPlay(false);
-        }).catch((err) => { console.log('[VideoPlayer] play() error:', err); });
+        videoRef.current.play().catch(() => {});
+        setWasUserGesture(true);
+        if (setIsFirstPlay) setIsFirstPlay(false);
+        // Android костыль: сразу ставим playing=true, чтобы снять с паузы с первого клика
+        if (isAndroid) {
+          setPlaying(true);
+        }
       }
       return;
     }
@@ -106,7 +97,7 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
       if (!videoRef.current.paused) {
         videoRef.current.pause();
       } else {
-        videoRef.current.play().catch((err) => { console.log('[VideoPlayer] play() error:', err); });
+        videoRef.current.play().catch(() => {});
       }
     }
   };
@@ -159,11 +150,8 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
                 }
               }
             }}
-            autoPlay={false}
-            onPointerDown={e => {
-              console.log('[VideoPlayer] onPointerDown', { isVideoReady, wasUserGesture });
-              if (isVideoReady) handlePlayPause(e);
-            }}
+            autoPlay={wasUserGesture ? playing : false}
+            onPointerDown={handlePlayPause}
             onPlay={() => setPlaying(true)}
             onPause={() => setPlaying(false)}
             onEnded={handleEnded}
@@ -171,12 +159,14 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
             onWaiting={() => setIsVideoLoading(true)}
             onCanPlay={() => {
               setIsVideoLoading(false);
-              setIsVideoReady(true);
               if (onVideoReady) onVideoReady();
               if (shouldSeekRef.current && videoRef.current) {
                 videoRef.current.currentTime = playedSeconds;
                 lastSeekRef.current = playedSeconds;
                 shouldSeekRef.current = false;
+              }
+              if (playing && videoRef.current && videoRef.current.paused) {
+                videoRef.current.play().catch(() => {});
               }
               // Если пользователь кликнул play до готовности видео, включаем проигрывание сейчас
               if (playRequested.current) {
@@ -199,23 +189,45 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
               WebkitTapHighlightColor: 'transparent',
             }}
           />
-          {showOverlay && (
+          <div
+            style={{
+              position: 'absolute',
+              left: '50%',
+              top: 'calc(50% - 84px)',
+              transform: playing ? 'translate(-50%, -50%) scale(0.7)' : 'translate(-50%, -50%) scale(1)',
+              opacity: playing ? 0 : 1,
+              transition: 'opacity 0.35s cubic-bezier(.4,0,.2,1), transform 0.35s cubic-bezier(.4,0,.2,1)',
+              pointerEvents: 'none', // overlay не ловит клики
+              zIndex: 2,
+              width: 82,
+              height: 82,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.5))',
+              WebkitTapHighlightColor: 'transparent',
+              WebkitUserSelect: 'none',
+              userSelect: 'none',
+              WebkitTouchCallout: 'none',
+              touchAction: 'manipulation',
+            }}
+          >
             <img
               src={playIcon}
               alt="Play"
               style={{
-                position: 'absolute',
-                left: '50%',
-                top: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: 120,
-                height: 120,
-                opacity: 0.92,
-                pointerEvents: 'none', // Клик всегда идет на <video>
-                zIndex: 10
+                width: 82,
+                height: 82,
+                display: 'block',
+                pointerEvents: 'none',
+                userSelect: 'none',
+                WebkitTouchCallout: 'none',
+                WebkitUserSelect: 'none',
+                touchAction: 'manipulation',
+                WebkitTapHighlightColor: 'transparent',
               }}
             />
-          )}
+          </div>
         </>
       ) : null}
       {/* Loader is now handled by parent via isVideoLoading state */}
