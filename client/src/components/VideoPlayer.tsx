@@ -82,9 +82,10 @@ export default function VideoPlayer({ setProgress, videos, currentIndex, setCurr
   const handlePlayPause = (e: React.PointerEvent<HTMLVideoElement>) => {
     if (!wasUserGesture) {
       if (videoRef.current) {
-        videoRef.current.play().catch(() => {});
-        setWasUserGesture(true);
-        if (setIsFirstPlay) setIsFirstPlay(false);
+        videoRef.current.play().then(() => {
+          setWasUserGesture(true);
+          if (setIsFirstPlay) setIsFirstPlay(false);
+        }).catch(() => {});
       }
       return;
     }
