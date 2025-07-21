@@ -50,6 +50,15 @@ function HomePage({ onSelect, activeTab, setMoney, showToast, showErrorModal, se
   const [hasBonus, setHasBonus] = useState<boolean>(false);
   const playedSeconds = useSelector((state: RootState) => state.videoProgress.playedSeconds);
   const firstLoadRef = useRef(true);
+  const [progressTransition, setProgressTransition] = useState(true);
+
+  // Сброс transition при смене видео
+  useEffect(() => {
+    setProgressTransition(false);
+    setProgress(0);
+    const t = setTimeout(() => setProgressTransition(true), 30);
+    return () => clearTimeout(t);
+  }, [currentIndex]);
 
   useEffect(() => {
     setMoney(balance);
@@ -446,7 +455,7 @@ function HomePage({ onSelect, activeTab, setMoney, showToast, showErrorModal, se
         onProgress={handleProgress}
         setIsFirstPlay={setIsFirstPlay} // новый проп
       />
-      <VideoProgressBar progress={progress} />
+      <VideoProgressBar progress={progress} transition={progressTransition} />
       <VideoTopBar onGiftClick={handleGiftClick} rate={rate} maxVideos={maxVideos} onProfileClick={handleOpenProfile} translations={translations} hideGiftIcon={hasBonus}/>
       <VideoBalanceBar translations={translations} />
       <VideoPromoBar onOpenTelegramChannel={openTelegramChannel} translations={translations} />
